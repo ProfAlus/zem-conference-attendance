@@ -179,7 +179,7 @@ table.data-table tr:hover td { background: var(--color-cream-50); }
 
 /* Mobile: sidebar becomes a slide-in drawer with a tap-outside-to-close overlay */
 @media (max-width: 860px) {
-  .sidebar { position: fixed; inset: 0 auto 0 0; transform: translateX(-100%); z-index: 30; transition: transform 0.2s ease; width: 78vw; max-width: 300px; }
+  .sidebar { position: fixed; inset: 0 auto 0 0; height: auto; transform: translateX(-100%); z-index: 30; transition: transform 0.2s ease; width: 78vw; max-width: 300px; }
   .sidebar.open { transform: translateX(0); }
   .sidebar-close {
     display: flex; align-items: center; justify-content: center;
@@ -202,6 +202,15 @@ table.data-table tr:hover td { background: var(--color-cream-50); }
 
 @media (max-width: 480px) {
   .topbar #topbarDate { display: none; }
+}
+
+/* ---------- Schedule page rows ---------- */
+.schedule-row { display: flex; gap: var(--sp-3); padding: 8px 0; border-top: 1px solid var(--color-ink-200); }
+.schedule-time { min-width: 120px; flex-shrink: 0; font-family: var(--font-mono); color: var(--color-ink-500); font-size: 0.85rem; }
+.schedule-title { flex: 1; min-width: 0; word-break: break-word; }
+@media (max-width: 600px) {
+  .schedule-row { flex-direction: column; gap: 2px; }
+  .schedule-time { min-width: 0; }
 }
 
 /* ---------- Toasts ---------- */

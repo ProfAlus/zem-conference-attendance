@@ -62,9 +62,9 @@ function render() {
         <div class="card mb-4">
           <h3 style="margin-bottom: 12px;">${escapeHtml(label)}</h3>
           ${rows.map((s) => `
-            <div class="flex gap-3" style="padding: 8px 0; border-top: 1px solid var(--color-ink-200);">
-              <div class="mono text-muted" style="min-width:130px; font-size:0.85rem; flex-shrink:0;">${escapeHtml(s.time)}</div>
-              <div>${escapeHtml(s.title)}</div>
+            <div class="schedule-row">
+              <div class="schedule-time">${escapeHtml(s.time)}</div>
+              <div class="schedule-title">${escapeHtml(s.title)}</div>
             </div>
           `).join('')}
         </div>

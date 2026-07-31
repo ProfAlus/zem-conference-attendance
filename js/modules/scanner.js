@@ -16,6 +16,7 @@ let currentDay = Number(localStorage.getItem('cams_scan_day') || 1);
 let conferenceDays = 3;
 let dayLabels = [];
 let todayDayNumber = null;
+let startDateSet = false;
 let checkInBlocked = false;
 const role = getSession()?.role;
 
@@ -58,6 +59,7 @@ async function init() {
     conferenceDays = settings.conferenceDays || 3;
     dayLabels = settings.dayLabels || [];
     todayDayNumber = settings.todayDayNumber;
+    startDateSet = !!settings.startDate;
   } catch { /* fall back to default of 3 */ }
   if (!dayLabels.length) {
     dayLabels = Array.from({ length: conferenceDays }, (_, i) => ({ day: i + 1, label: `Day ${i + 1}`, short: `D${i + 1}` }));
@@ -114,6 +116,24 @@ function renderDaySelector() {
       currentDay = Number(daySelect.value);
       localStorage.setItem('cams_scan_day', currentDay);
     });
+    return;
+  }
+
+  // Day-lock only activates once a Start Date is configured in Settings —
+  // otherwise volunteers get the normal dropdown too, same as admin, rather
+  // than being blocked entirely over an incomplete Settings page.
+  if (!startDateSet) {
+    wrap.innerHTML = `
+      <label for="daySelect">Checking in for</label>
+      <select class="input" id="daySelect" style="width:auto;"></select>
+    `;
+    const daySelect = document.getElementById('daySelect');
+    daySelect.innerHTML = dayLabels.map((d) => `<option value="${d.day}" ${d.day === currentDay ? 'selected' : ''}>${d.label}</option>`).join('');
+    daySelect.addEventListener('change', () => {
+      currentDay = Number(daySelect.value);
+      localStorage.setItem('cams_scan_day', currentDay);
+    });
+    checkInBlocked = false;
     return;
   }
 
