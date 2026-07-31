@@ -22,6 +22,7 @@
 <link rel="modulepreload" href="js/core/theme.js">
 <link rel="modulepreload" href="js/core/offline.js">
 <link rel="modulepreload" href="js/core/nav.js">
+<link rel="modulepreload" href="js/core/biometric.js">
 </head>
 <body>
   <div class="public-page">
@@ -30,6 +31,16 @@
         <span class="dot" data-brand-logo="public"></span>
         <h1>Team sign in</h1>
         <p class="text-muted">For volunteers and administrators</p>
+      </div>
+
+      <div id="biometricPane" style="display:none; margin-bottom: 20px;">
+        <button class="btn btn-dark btn-block" id="biometricUnlockBtn">
+          <i class="fa-solid fa-fingerprint"></i> Unlock with fingerprint / Face ID
+        </button>
+        <p class="text-muted" style="text-align:center; font-size:0.8rem; margin-top:10px;">
+          <a href="#" id="usePasscodeInsteadLink">Use passcode instead</a>
+        </p>
+        <div style="text-align:center; margin: 14px 0; color: var(--color-ink-200);">— or —</div>
       </div>
 
       <form id="loginForm">
@@ -46,6 +57,10 @@
           <i class="fa-solid fa-right-to-bracket"></i> Sign in
         </button>
       </form>
+
+      <p class="text-muted" style="text-align:center; font-size: 0.85rem; margin-top: 16px;" id="forgetDeviceWrap">
+        <a href="#" id="forgetDeviceLink">Forget saved login on this device</a>
+      </p>
 
       <p class="text-muted" style="text-align:center; font-size: 0.85rem; margin-top: 16px;">
         <a href="index.html">&larr; Back</a>

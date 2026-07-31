@@ -42,6 +42,16 @@ async function init() {
             <div class="field" style="flex:1;"><label for="conferenceDays">Number of days</label>
               <input class="input" id="conferenceDays" type="number" min="1" max="14" value="${settings.conferenceDays || 3}"></div>
           </div>
+          <div class="card card-tight mb-4" style="background: ${settings.todayDayNumber ? 'var(--color-success-tint)' : 'var(--color-warning-tint)'};">
+            <div style="font-size:0.85rem;">
+              <i class="fa-solid ${settings.todayDayNumber ? 'fa-circle-check' : 'fa-triangle-exclamation'}"></i>
+              ${settings.todayDayNumber
+                ? `<strong>Today is ${settings.dayLabels?.[settings.todayDayNumber - 1]?.label || `Day ${settings.todayDayNumber}`}</strong> of your conference — Scanner and new registrations will auto-mark this day.`
+                : settings.startDate
+                  ? `<strong>Today falls outside your configured conference dates.</strong> New registrations won't auto-mark any day, and volunteers can't check anyone in until an admin fixes the Start Date/Number of days below, or this is expected if the event hasn't started yet.`
+                  : `<strong>No Start Date set yet.</strong> Auto-check-in on registration and the volunteer day-lock are both inactive until you set one below.`}
+            </div>
+          </div>
           <div class="field" style="max-width:220px;"><label for="dailyStartTime">Daily programme start time</label>
             <input class="input" id="dailyStartTime" type="time" value="${settings.dailyStartTime || '08:00'}">
             <div class="hint">Public self-registration opens 1 hour before this time each day (currently ${settings.registrationOpensAt ? formatTime12h(settings.registrationOpensAt) : '—'}). Staff can still register people anytime via Participants → Add participant.</div>
@@ -184,6 +194,7 @@ async function init() {
       const updated = await apiCall('updateSettings', collectPayload());
       applyBranding(updated);
       toastSuccess('Settings saved.');
+      init(); // refresh so the "Today is Day X" diagnostic reflects any date change immediately
     } catch (err) {
       toastError(err.message);
     }

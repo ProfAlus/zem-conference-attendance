@@ -18,6 +18,9 @@ let dayLabels = [];
 let todayDayNumber = null;
 let startDateSet = false;
 let checkInBlocked = false;
+let html5QrCode = null;
+let scanning = false;
+let lastScanTime = 0;
 const role = getSession()?.role;
 
 async function init() {
