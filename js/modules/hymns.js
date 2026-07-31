@@ -15,7 +15,11 @@ async function init() {
       apiCall('getHymns'),
       loadAndApplyBranding(),
     ]);
-    hymns = hymnData.map((h) => ({ ...h, sections: parseContent(h.content) }));
+    hymns = hymnData.map((h) => ({ ...h, sections: parseContent(h.content), isTheme: /theme|anthem/i.test(h.title) }));
+    // Number hymns 1, 2, 3… in their stable stored order — the conference
+    // theme song/anthem is labeled separately rather than numbered with them.
+    let n = 0;
+    hymns.forEach((h) => { if (!h.isTheme) h.number = ++n; });
     if (settings?.conferenceName) confNameEl.textContent = `${settings.conferenceName} — Hymns`;
     render();
   } catch (err) {
@@ -62,7 +66,10 @@ function render() {
 
   listEl.innerHTML = results.map((h) => `
     <div class="card mb-4">
-      <h3 style="margin-bottom:2px;">${escapeHtml(h.title)}</h3>
+      <h3 style="margin-bottom:2px;">
+        ${h.isTheme ? '<span class="badge badge-gold" style="margin-right:8px; vertical-align:middle;">Theme Song</span>' : `<span class="text-muted" style="font-weight:400;">Hymn ${h.number}:</span> `}
+        ${escapeHtml(h.title)}
+      </h3>
       ${h.author ? `<p class="text-muted" style="font-style:italic; margin-bottom:16px;">Author: ${escapeHtml(h.author)}</p>` : ''}
       ${h.sections.map((s) => `
         <div style="margin-bottom:14px;">

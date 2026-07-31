@@ -36,7 +36,11 @@ const els = {
   offlineRegisterAnotherLink: document.getElementById('offlineRegisterAnotherLink'),
   closedNotice: document.getElementById('closedNotice'),
   closedMessage: document.getElementById('closedMessage'),
+  autoCheckinBadge: document.getElementById('autoCheckinBadge'),
+  autoCheckinText: document.getElementById('autoCheckinText'),
 };
+
+let dayLabels = [];
 
 // Build radio pill groups
 function buildRadioGroup(container, name, options) {
@@ -52,6 +56,7 @@ buildRadioGroup(els.ageGroup, 'ageGroup', CONFIG.AGE_GROUPS);
 els.confName.textContent = CONFIG.DEFAULTS.conferenceName;
 loadAndApplyBranding().then((settings) => {
   if (settings?.conferenceName) els.confName.textContent = settings.conferenceName;
+  dayLabels = settings?.dayLabels || [];
   applyRegistrationWindow(settings);
 });
 
@@ -171,6 +176,14 @@ function showSuccess(data, isNew = true) {
     : '<i class="fa-solid fa-rotate"></i> Welcome back — already registered';
 
   els.dupWarning.style.display = data.possibleDuplicate ? 'block' : 'none';
+
+  if (data.autoCheckedInDay) {
+    const label = dayLabels[data.autoCheckedInDay - 1]?.label || `Day ${data.autoCheckedInDay}`;
+    els.autoCheckinText.textContent = `You're marked present for ${label}`;
+    els.autoCheckinBadge.style.display = 'inline-flex';
+  } else {
+    els.autoCheckinBadge.style.display = 'none';
+  }
 
   els.qrCanvas.innerHTML = '';
   // eslint-disable-next-line no-undef

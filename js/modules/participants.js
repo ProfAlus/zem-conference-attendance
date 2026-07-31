@@ -285,9 +285,10 @@ function openAddParticipantModal() {
         }
         try {
           const result = await apiCall('register', payload);
+          const dayNote = result.autoCheckedInDay ? ` — marked present for ${dayLabels[result.autoCheckedInDay - 1]?.label || `Day ${result.autoCheckedInDay}`}` : '';
           toastSuccess(result.alreadyRegistered
-            ? `${result.fullName} was already registered (${result.registrationId}).`
-            : `${result.fullName} registered (${result.registrationId}).`);
+            ? `${result.fullName} was already registered (${result.registrationId})${dayNote}.`
+            : `${result.fullName} registered (${result.registrationId})${dayNote}.`);
           b.remove();
           loadParticipants();
         } catch (err) {
