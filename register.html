@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register — Conference Attendance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/responsive.css">
+<link rel="modulepreload" href="js/core/config.js">
+<link rel="modulepreload" href="js/core/api.js">
+<link rel="modulepreload" href="js/core/auth.js">
+<link rel="modulepreload" href="js/core/toast.js">
+<link rel="modulepreload" href="js/core/modal.js">
+<link rel="modulepreload" href="js/core/utils.js">
+<link rel="modulepreload" href="js/core/theme.js">
+<link rel="modulepreload" href="js/core/offline.js">
+<link rel="modulepreload" href="js/core/nav.js">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+  <div class="public-page">
+    <div class="public-card">
+
+      <!-- STEP: FORM -->
+      <div id="formStep">
+        <div class="public-brand">
+          <span class="dot" data-brand-logo="public"></span>
+          <h1 id="confName">Register</h1>
+          <p class="text-muted">One form, three days — takes under a minute.</p>
+        </div>
+
+        <form id="regForm" novalidate>
+          <div class="field">
+            <label for="fullName">Full name *</label>
+            <input class="input" id="fullName" name="fullName" required autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="address">Address <span class="text-muted">(optional)</span></label>
+            <input class="input" id="address" name="address" autocomplete="street-address">
+          </div>
+          <div class="field">
+            <label for="church">Church *</label>
+            <input class="input" id="church" name="church" required autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="email">Email <span class="text-muted">(optional)</span></label>
+            <input class="input" id="email" name="email" type="email" autocomplete="email">
+          </div>
+          <div class="field">
+            <label for="phone">Phone number *</label>
+            <input class="input" id="phone" name="phone" type="tel" required autocomplete="tel" placeholder="e.g. 076 123 456">
+            <div class="hint">Your phone number is what finds your record and QR code later.</div>
+          </div>
+          <div class="field">
+            <label>Gender *</label>
+            <div class="radio-group" id="genderGroup"></div>
+          </div>
+          <div class="field">
+            <label>Age group *</label>
+            <div class="radio-group" id="ageGroup"></div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
+            <i class="fa-solid fa-check"></i> Complete registration
+          </button>
+        </form>
+
+        <!-- Shown instead of the form when self-registration is closed or outside the daily window -->
+        <div id="closedNotice" class="card card-tight" style="display:none; background: var(--color-warning-tint); text-align:center;">
+          <i class="fa-solid fa-clock" style="font-size:1.4rem; margin-bottom:8px;"></i>
+          <p id="closedMessage" style="margin:0; font-weight:600;">Registration is not open yet.</p>
+        </div>
+
+        <p class="text-muted" style="text-align:center; font-size: 0.85rem; margin-top: 16px;">
+          Already registered? <a href="#" id="lookupLink">Find my QR code</a>
+        </p>
+
+        <!-- Lookup by phone (already registered) -->
+        <form id="lookupForm" style="display:none;">
+          <div class="field">
+            <label for="lookupPhone">Enter your phone number</label>
+            <input class="input" id="lookupPhone" type="tel" required>
+          </div>
+          <button type="submit" class="btn btn-dark btn-block">Find my registration</button>
+          <p class="text-muted" style="text-align:center; font-size: 0.85rem; margin-top: 16px;">
+            <a href="#" id="backToFormLink">&larr; Back to registration form</a>
+          </p>
+        </form>
+      </div>
+
+      <!-- STEP: SUCCESS / QR -->
+      <div id="successStep" style="display:none; text-align:center;">
+        <div class="badge badge-success mb-4" id="statusBadge" style="margin: 0 auto 16px;">
+          <i class="fa-solid fa-circle-check"></i> Registered
+        </div>
+        <h2 id="successName">—</h2>
+        <p class="text-muted mono" id="successRegId">—</p>
+
+        <div id="qrCanvas" style="display:flex; justify-content:center; margin: 20px 0;"></div>
+
+        <div class="card card-tight" style="background: var(--color-cream-100); margin-bottom: 16px;">
+          <div class="text-muted" style="font-size: 0.8rem;">Show this QR code to a volunteer at check-in each day.</div>
+        </div>
+
+        <div class="flex gap-3" style="justify-content:center;">
+          <button class="btn btn-outline" id="downloadBtn"><i class="fa-solid fa-download"></i> Download</button>
+          <button class="btn btn-outline" id="printBtn"><i class="fa-solid fa-print"></i> Print</button>
+        </div>
+        <p style="margin-top: 20px;"><a href="#" id="registerAnotherLink">Register someone else</a></p>
+        <p style="margin-top: 4px;"><a href="materials.html" target="_blank" rel="noopener"><i class="fa-solid fa-folder-open"></i> View conference materials</a></p>
+      </div>
+
+      <div id="dupWarning" class="card card-tight" style="display:none; background: var(--color-warning-tint); margin-top:16px;">
+        <strong><i class="fa-solid fa-triangle-exclamation"></i> Possible duplicate detected.</strong>
+        <p style="margin:4px 0 0;">A similar name/church combination already exists under a different phone number. A volunteer will review this.</p>
+      </div>
+
+      <!-- STEP: OFFLINE PENDING (no connection when submitted — no real Registration ID yet) -->
+      <div id="offlinePendingStep" style="display:none; text-align:center;">
+        <div class="badge badge-pending mb-4" style="margin: 0 auto 16px;">
+          <i class="fa-solid fa-cloud-arrow-up"></i> Saved — will register when back online
+        </div>
+        <h2 id="offlineName">—</h2>
+        <p class="text-muted" style="margin-top: 12px;">
+          No internet connection right now, so your details are saved on this device
+          and will be sent automatically the moment it reconnects — no need to do
+          anything else. Keep this tab open if you can.
+        </p>
+        <div class="card card-tight" style="background: var(--color-cream-100); margin: 16px 0;">
+          <div class="text-muted" style="font-size: 0.8rem;">
+            Once it syncs, come back here and use "Find my QR code" with your phone
+            number to get your QR code.
+          </div>
+        </div>
+        <p><a href="#" id="offlineRegisterAnotherLink">Register someone else</a></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="qr-print-tag" id="printTag"></div>
+
+  <script type="module" src="js/modules/register.js"></script>
+</body>
+</html>

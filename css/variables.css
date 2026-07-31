@@ -1,0 +1,68 @@
+/* ============================================================
+   DESIGN TOKENS
+   Conference Registration & Attendance Management System
+   ============================================================ */
+:root {
+  /* --- Color: Ink / Coral / Gold on warm cream --- */
+  --color-ink-900: #1B1640;      /* primary deep indigo — headers, nav, text */
+  --color-ink-700: #322B5E;
+  --color-ink-500: #6B6785;      /* muted slate text */
+  --color-ink-200: #DAD7E8;
+  --color-cream-50: #FFF9F2;     /* app background */
+  --color-cream-100: #FBF3E7;
+  --color-surface: #FFFFFF;
+
+  --color-coral: #FF6B4E;        /* primary accent — CTAs, active nav */
+  --color-coral-dark: #E5502F;
+  --color-coral-tint: #FFE7E0;
+
+  --color-gold: #F2B705;         /* secondary accent — badges, day markers */
+  --color-gold-tint: #FDF1C7;
+
+  --color-teal: #159895;         /* charts / data accent */
+  --color-teal-tint: #DFF4F3;
+
+  --color-success: #2FA84F;
+  --color-success-tint: #E4F6E9;
+  --color-danger: #E5484D;
+  --color-danger-tint: #FBE4E4;
+  --color-warning: #E5A72A;
+  --color-warning-tint: #FCF1DA;
+
+  /* --- Type --- */
+  --font-display: 'Sora', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-base: 1rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.375rem;
+  --fs-2xl: 1.75rem;
+  --fs-3xl: 2.25rem;
+  --fs-4xl: 3rem;
+
+  /* --- Spacing (8px scale) --- */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+  --sp-8: 4rem;
+
+  /* --- Radius / Shadow --- */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  --shadow-sm: 0 1px 3px rgba(27, 22, 64, 0.08);
+  --shadow-md: 0 8px 24px rgba(27, 22, 64, 0.10);
+  --shadow-lg: 0 20px 48px rgba(27, 22, 64, 0.16);
+
+  --sidebar-w: 240px;
+  --topbar-h: 64px;
+}

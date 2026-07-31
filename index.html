@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conference Attendance System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/responsive.css">
+<link rel="modulepreload" href="js/core/config.js">
+<link rel="modulepreload" href="js/core/api.js">
+<link rel="modulepreload" href="js/core/auth.js">
+<link rel="modulepreload" href="js/core/toast.js">
+<link rel="modulepreload" href="js/core/modal.js">
+<link rel="modulepreload" href="js/core/utils.js">
+<link rel="modulepreload" href="js/core/theme.js">
+<link rel="modulepreload" href="js/core/offline.js">
+<link rel="modulepreload" href="js/core/nav.js">
+</head>
+<body>
+  <div class="public-page">
+    <div class="public-card" style="text-align:center;">
+      <div class="public-brand">
+        <span class="dot" data-brand-logo="public"></span>
+        <h1 id="confName">Youth Conference</h1>
+        <p class="text-muted">Registration &amp; Attendance</p>
+      </div>
+      <div style="display:flex; flex-direction:column; gap: 12px;">
+        <a href="register.html" class="btn btn-primary btn-block">
+          <i class="fa-solid fa-user-plus"></i> Register for the conference
+        </a>
+        <a href="materials.html" class="btn btn-outline btn-block">
+          <i class="fa-solid fa-folder-open"></i> Conference materials
+        </a>
+        <a href="login.html" class="btn btn-outline btn-block">
+          <i class="fa-solid fa-user-shield"></i> Volunteer / Admin sign in
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { CONFIG } from './js/core/config.js';
+    import { loadAndApplyBranding } from './js/core/theme.js';
+
+    document.getElementById('confName').textContent = CONFIG.DEFAULTS.conferenceName;
+    loadAndApplyBranding().then((settings) => {
+      if (settings?.conferenceName) document.getElementById('confName').textContent = settings.conferenceName;
+    });
+  </script>
+</body>
+</html>

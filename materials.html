@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conference Materials</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/responsive.css">
+<link rel="modulepreload" href="js/core/config.js">
+<link rel="modulepreload" href="js/core/api.js">
+<link rel="modulepreload" href="js/core/utils.js">
+<link rel="modulepreload" href="js/core/theme.js">
+</head>
+<body>
+  <div style="min-height:100vh; background: var(--color-cream-50);">
+    <div class="container" style="padding-top: var(--sp-7); padding-bottom: var(--sp-7); max-width: 900px;">
+      <div style="text-align:center; margin-bottom: var(--sp-6);">
+        <span class="dot" data-brand-logo="public" style="width:12px;height:12px;border-radius:50%;background:var(--color-coral);display:inline-block;margin-bottom:8px;"></span>
+        <h1 id="confName" style="margin-bottom:4px;">Conference Materials</h1>
+        <p class="text-muted">Schedules, slides, and resources for participants.</p>
+        <p style="margin-top:8px;">
+          <a href="register.html?lookup=1"><i class="fa-solid fa-qrcode"></i> Find my QR code</a>
+          &nbsp;·&nbsp;
+          <a href="register.html">Register</a>
+        </p>
+      </div>
+
+      <div class="grid-2 mb-4">
+        <a href="schedule.html" class="card" style="text-decoration:none; display:flex; gap:14px; align-items:center;">
+          <div style="width:44px; height:44px; border-radius:10px; background: var(--color-coral-tint); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <i class="fa-solid fa-calendar-days" style="color: var(--color-coral); font-size:1.2rem;"></i>
+          </div>
+          <div>
+            <div style="font-weight:600; color: var(--color-ink-900);">Full Schedule</div>
+            <div class="text-muted" style="font-size:0.85rem;">Search or browse day-by-day</div>
+          </div>
+        </a>
+        <a href="hymns.html" class="card" style="text-decoration:none; display:flex; gap:14px; align-items:center;">
+          <div style="width:44px; height:44px; border-radius:10px; background: var(--color-teal-tint); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <i class="fa-solid fa-music" style="color: var(--color-teal); font-size:1.2rem;"></i>
+          </div>
+          <div>
+            <div style="font-weight:600; color: var(--color-ink-900);">Hymn Booklet</div>
+            <div class="text-muted" style="font-size:0.85rem;">Searchable, all verses</div>
+          </div>
+        </a>
+      </div>
+
+      <div id="materialsList">
+        <div style="text-align:center; padding: 40px 0;"><span class="spinner spinner-dark"></span></div>
+      </div>
+
+      <p style="text-align:center; margin-top: var(--sp-6);"><a href="index.html">&larr; Back</a></p>
+    </div>
+  </div>
+
+  <script type="module" src="js/modules/materials.js"></script>
+</body>
+</html>

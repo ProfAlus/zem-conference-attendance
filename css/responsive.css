@@ -1,0 +1,51 @@
+/* ============================================================
+   PUBLIC PAGE LAYOUT (registration / login — no sidebar)
+   ============================================================ */
+.public-page {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--sp-5);
+  background:
+    radial-gradient(circle at 15% 10%, var(--color-coral-tint) 0%, transparent 45%),
+    radial-gradient(circle at 85% 90%, var(--color-teal-tint) 0%, transparent 45%),
+    var(--color-cream-50);
+}
+.public-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  max-width: 480px; width: 100%;
+  padding: var(--sp-7) var(--sp-6);
+}
+.public-brand { text-align: center; margin-bottom: var(--sp-6); }
+.public-brand .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--color-coral); display: inline-block; margin-bottom: var(--sp-2); }
+.public-brand h1 { font-size: var(--fs-2xl); }
+.public-brand p { margin: 0; }
+
+@media (max-width: 480px) {
+  .public-card { padding: var(--sp-5) var(--sp-4); }
+}
+
+/* ============================================================
+   PRINT (attendance sheets / QR code)
+   ============================================================ */
+@media print {
+  .no-print, .sidebar, .sidebar-overlay, .topbar, .toast-stack, .modal-backdrop { display: none !important; }
+  .app-shell, .main-area, .page-content { display: block !important; padding: 0 !important; }
+  body { background: #fff !important; }
+  .card, .table-wrap { box-shadow: none !important; border: 1px solid #ccc !important; }
+  /* Browsers strip background colors/images by default when printing —
+     this forces table header shading (and any other background colors)
+     to actually appear on the printed page instead of turning blank. */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+}
+.qr-print-tag {
+  display: none;
+}
+@media print {
+  .qr-print-tag { display: block; text-align: center; padding: var(--sp-6); }
+}
