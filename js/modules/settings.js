@@ -46,7 +46,7 @@ async function init() {
             <div style="font-size:0.85rem;">
               <i class="fa-solid ${settings.todayDayNumber ? 'fa-circle-check' : 'fa-triangle-exclamation'}"></i>
               ${settings.todayDayNumber
-                ? `<strong>Today is ${settings.dayLabels?.[settings.todayDayNumber - 1]?.label || `Day ${settings.todayDayNumber}`}</strong> of your conference — Scanner and new registrations will auto-mark this day.`
+                ? `<strong>Today is ${settings.dayLabels?.[settings.todayDayNumber - 1]?.label || `Day ${settings.todayDayNumber}`}</strong> of your conference — ${settings.registrationOpenNow ? 'registration and volunteer check-in are open now.' : `registration and volunteer check-in open at ${formatTime12h(settings.registrationOpensAt)} today.`}`
                 : settings.startDate
                   ? `<strong>Today falls outside your configured conference dates.</strong> New registrations won't auto-mark any day, and volunteers can't check anyone in until an admin fixes the Start Date/Number of days below, or this is expected if the event hasn't started yet.`
                   : `<strong>No Start Date set yet.</strong> Auto-check-in on registration and the volunteer day-lock are both inactive until you set one below.`}
@@ -54,7 +54,10 @@ async function init() {
           </div>
           <div class="field" style="max-width:220px;"><label for="dailyStartTime">Daily programme start time</label>
             <input class="input" id="dailyStartTime" type="time" value="${settings.dailyStartTime || '08:00'}">
-            <div class="hint">Public self-registration opens 1 hour before this time each day (currently ${settings.registrationOpensAt ? formatTime12h(settings.registrationOpensAt) : '—'}). Staff can still register people anytime via Participants → Add participant.</div>
+          </div>
+          <div class="field" style="max-width:220px;"><label for="windowMinutes">Window before start (minutes)</label>
+            <input class="input" id="windowMinutes" type="number" min="0" max="720" value="${settings.windowMinutes ?? 60}">
+            <div class="hint">Registration and volunteer check-in both open this many minutes before the daily start time (currently ${settings.registrationOpensAt ? formatTime12h(settings.registrationOpensAt) : '—'}), and stay open the rest of that day. See the staff toggle below for whether "Add participant" bypasses this.</div>
           </div>
           <div class="field"><label for="logoUrl">Logo URL</label>
             <input class="input" id="logoUrl" value="${settings.logoUrl || ''}" placeholder="https://… (or upload a file below)"></div>
@@ -73,6 +76,13 @@ async function init() {
               <input type="checkbox" id="selfRegEnabled" ${settings.selfRegEnabled !== false ? 'checked' : ''}>
               Enable public self-registration
             </label>
+          </div>
+          <div class="field">
+            <label class="radio-pill" style="width:fit-content;">
+              <input type="checkbox" id="staffBypassWindow" ${settings.staffBypassWindow !== false ? 'checked' : ''}>
+              Staff can register participants anytime (Add participant bypasses the window)
+            </label>
+            <div class="hint">Turn this off to make staff-assisted registrations respect the same registration window as the public form, instead of always being allowed.</div>
           </div>
           <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save settings</button>
         </form>
@@ -161,6 +171,25 @@ async function init() {
     </div>
 
     <div class="card mt-6">
+      <div class="flex-between mb-4">
+        <div>
+          <h3 style="margin:0;">Speakers</h3>
+          <p class="text-muted" style="margin:4px 0 0;">Speaker profiles with photo and bio, shown on the public Speakers page.</p>
+        </div>
+        <button class="btn btn-primary btn-sm" id="addSpeakerBtn"><i class="fa-solid fa-plus"></i> Add speaker</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th></th><th>Name</th><th>Title</th><th></th></tr></thead>
+          <tbody id="speakersTbody"></tbody>
+        </table>
+      </div>
+      <p class="text-muted" style="font-size:0.8rem; margin-top:8px;">
+        <a href="speakers.html" target="_blank" rel="noopener">View the public Speakers page &rarr;</a>
+      </p>
+    </div>
+
+    <div class="card mt-6">
       <h3>Reuse this system for another event</h3>
       <p class="text-muted">
         Archive the current participants, attendance, and activity logs into dated backup
@@ -232,6 +261,9 @@ async function init() {
 
   document.getElementById('addHymnBtn').addEventListener('click', () => openHymnModal());
   await loadHymns();
+
+  document.getElementById('addSpeakerBtn').addEventListener('click', () => openSpeakerModal());
+  await loadSpeakers();
 }
 
 function formatTime12h(hhmm) {
@@ -249,9 +281,11 @@ function collectPayload() {
     startDate: document.getElementById('startDate').value,
     conferenceDays: Number(document.getElementById('conferenceDays').value) || 3,
     dailyStartTime: document.getElementById('dailyStartTime').value || '08:00',
+    windowMinutes: Number(document.getElementById('windowMinutes').value) || 60,
     logoUrl: document.getElementById('logoUrl').value.trim(),
     themeColor: document.getElementById('themeColor').value,
     selfRegEnabled: document.getElementById('selfRegEnabled').checked,
+    staffBypassWindow: document.getElementById('staffBypassWindow').checked,
   };
 }
 
@@ -622,6 +656,131 @@ function openHymnModal(existing = null) {
       },
     },
   ]);
+}
+
+async function loadSpeakers() {
+  const tbody = document.getElementById('speakersTbody');
+  tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:16px;"><span class="spinner spinner-dark"></span></td></tr>`;
+  try {
+    const speakers = await apiCall('getSpeakers');
+    if (!speakers.length) {
+      tbody.innerHTML = `<tr><td colspan="4" class="text-muted" style="text-align:center;padding:16px;">No speakers yet.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = speakers.map((s) => `
+      <tr>
+        <td>${s.photoUrl ? `<img src="${escapeHtml(s.photoUrl)}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">` : `<div style="width:32px;height:32px;border-radius:50%;background:var(--color-coral-tint);display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-user" style="font-size:0.7rem;color:var(--color-coral);"></i></div>`}</td>
+        <td><strong>${escapeHtml(s.name)}</strong></td>
+        <td>${escapeHtml(s.title || '\u2014')}</td>
+        <td>
+          <button class="btn btn-sm btn-ghost edit-speaker" data-id="${escapeHtml(s.id)}"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn btn-sm btn-ghost delete-speaker" data-id="${escapeHtml(s.id)}" data-name="${escapeHtml(s.name)}" style="color:var(--color-danger);"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>
+    `).join('');
+
+    tbody.querySelectorAll('.edit-speaker').forEach((btn) => {
+      btn.addEventListener('click', () => openSpeakerModal(speakers.find((x) => x.id === btn.dataset.id)));
+    });
+    tbody.querySelectorAll('.delete-speaker').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const ok = await confirmDialog(`Remove <strong>${escapeHtml(btn.dataset.name)}</strong> from Speakers?`, {
+          title: 'Remove speaker', confirmLabel: 'Remove', danger: true,
+        });
+        if (!ok) return;
+        try {
+          await apiCall('deleteSpeaker', { id: btn.dataset.id });
+          toastSuccess('Speaker removed.');
+          loadSpeakers();
+        } catch (err) {
+          toastError(err.message);
+        }
+      });
+    });
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="4" class="text-muted" style="text-align:center;padding:16px;">${err.message}</td></tr>`;
+  }
+}
+
+function openSpeakerModal(existing = null) {
+  const isEdit = !!existing;
+  const body = `
+    <div class="field"><label for="spkName">Name</label>
+      <input class="input" id="spkName" value="${existing ? escapeHtml(existing.name) : ''}"></div>
+    <div class="field"><label for="spkTitle">Title / role <span class="text-muted">(optional)</span></label>
+      <input class="input" id="spkTitle" value="${existing ? escapeHtml(existing.title || '') : ''}" placeholder="e.g. Keynote Speaker, Youth Pastor"></div>
+    <div class="field"><label for="spkBio">Bio <span class="text-muted">(optional)</span></label>
+      <textarea class="input" id="spkBio" rows="5">${existing ? escapeHtml(existing.bio || '') : ''}</textarea>
+    </div>
+    <div class="field">
+      <label>Photo <span class="text-muted">(optional)</span></label>
+      <div class="flex gap-3" style="align-items:center;">
+        ${existing?.photoUrl ? `<img id="spkPhotoPreview" src="${escapeHtml(existing.photoUrl)}" alt="" style="height:44px;width:44px;border-radius:50%;object-fit:cover;border:1px solid var(--color-ink-200);">` : '<span id="spkPhotoPreview" class="text-muted" style="font-size:0.8rem;">No photo yet</span>'}
+        <button type="button" class="btn btn-outline btn-sm" id="spkUploadBtn"><i class="fa-solid fa-upload"></i> Upload photo</button>
+        <input type="file" id="spkFileInput" accept="image/*" style="display:none;">
+      </div>
+      <input class="input mt-4" id="spkPhotoUrl" value="${existing ? escapeHtml(existing.photoUrl || '') : ''}" placeholder="Or paste an image URL">
+    </div>
+  `;
+  const backdrop = openModal(isEdit ? 'Edit speaker' : 'Add speaker', body, [
+    { label: 'Cancel', className: 'btn-ghost', onClick: (b) => b.remove() },
+    {
+      label: isEdit ? 'Save changes' : 'Add speaker',
+      className: 'btn-primary',
+      onClick: async (b) => {
+        const payload = {
+          name: document.getElementById('spkName').value.trim(),
+          title: document.getElementById('spkTitle').value.trim(),
+          bio: document.getElementById('spkBio').value.trim(),
+          photoUrl: document.getElementById('spkPhotoUrl').value.trim(),
+        };
+        if (!payload.name) { toastError('Name is required.'); return; }
+        try {
+          if (isEdit) {
+            await apiCall('updateSpeaker', { id: existing.id, ...payload });
+            toastSuccess('Speaker updated.');
+          } else {
+            await apiCall('addSpeaker', payload);
+            toastSuccess('Speaker added.');
+          }
+          b.remove();
+          loadSpeakers();
+        } catch (err) {
+          toastError(err.message);
+        }
+      },
+    },
+  ]);
+
+  backdrop.querySelector('#spkUploadBtn').addEventListener('click', () => backdrop.querySelector('#spkFileInput').click());
+  backdrop.querySelector('#spkFileInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toastError('Please choose an image file.'); return; }
+
+    const uploadBtn = backdrop.querySelector('#spkUploadBtn');
+    const original = uploadBtn.innerHTML;
+    uploadBtn.disabled = true;
+    uploadBtn.innerHTML = '<span class="spinner spinner-dark" style="width:14px;height:14px;border-width:2px;"></span> Uploading…';
+    try {
+      const { base64, mimeType } = await resizeImageToBase64(file, 400);
+      const { url } = await apiCall('uploadLogo', { base64, mimeType, fileName: file.name });
+      backdrop.querySelector('#spkPhotoUrl').value = url;
+      const preview = backdrop.querySelector('#spkPhotoPreview');
+      const img = document.createElement('img');
+      img.id = 'spkPhotoPreview';
+      img.src = url;
+      img.style.cssText = 'height:44px;width:44px;border-radius:50%;object-fit:cover;border:1px solid var(--color-ink-200);';
+      preview.replaceWith(img);
+      toastSuccess('Photo uploaded.');
+    } catch (err) {
+      toastError(err.message);
+    } finally {
+      uploadBtn.disabled = false;
+      uploadBtn.innerHTML = original;
+      e.target.value = '';
+    }
+  });
 }
 
 function openUserModal(existing = null) {

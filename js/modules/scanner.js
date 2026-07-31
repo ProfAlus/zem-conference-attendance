@@ -17,6 +17,8 @@ let conferenceDays = 3;
 let dayLabels = [];
 let todayDayNumber = null;
 let startDateSet = false;
+let windowOpenNow = true;
+let windowOpensAt = null;
 let checkInBlocked = false;
 let html5QrCode = null;
 let scanning = false;
@@ -63,6 +65,8 @@ async function init() {
     dayLabels = settings.dayLabels || [];
     todayDayNumber = settings.todayDayNumber;
     startDateSet = !!settings.startDate;
+    windowOpenNow = settings.registrationOpenNow;
+    windowOpensAt = settings.registrationOpensAt;
   } catch { /* fall back to default of 3 */ }
   if (!dayLabels.length) {
     dayLabels = Array.from({ length: conferenceDays }, (_, i) => ({ day: i + 1, label: `Day ${i + 1}`, short: `D${i + 1}` }));
@@ -152,10 +156,28 @@ function renderDaySelector() {
   checkInBlocked = false;
   currentDay = todayDayNumber;
   const today = dayLabels[todayDayNumber - 1];
+
+  if (!windowOpenNow) {
+    checkInBlocked = true;
+    wrap.innerHTML = `
+      <label>Checking in for</label>
+      <div class="badge badge-warning"><i class="fa-solid fa-clock"></i> ${today?.label || `Day ${todayDayNumber}`} — opens at ${formatTime12h(windowOpensAt)}</div>
+    `;
+    return;
+  }
+
   wrap.innerHTML = `
     <label>Checking in for</label>
     <div class="badge badge-neutral"><i class="fa-solid fa-lock"></i> ${today?.label || `Day ${todayDayNumber}`}</div>
   `;
+}
+
+function formatTime12h(hhmm) {
+  if (!hhmm) return '';
+  const [h, m] = hhmm.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
 }
 
 function startScanner() {
@@ -229,8 +251,11 @@ async function checkIn(registrationId) {
   const resultBody = document.getElementById('resultBody');
 
   if (checkInBlocked) {
-    resultBody.innerHTML = `<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i><p>Today is outside the conference dates — an admin needs to check people in.</p></div>`;
-    toastError('Today is outside the conference dates.');
+    const msg = !windowOpenNow
+      ? `Check-in for today opens at ${formatTime12h(windowOpensAt)} — an admin can override if needed.`
+      : 'Today is outside the conference dates — an admin needs to check people in.';
+    resultBody.innerHTML = `<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i><p>${msg}</p></div>`;
+    toastError(msg);
     return;
   }
 

@@ -10,7 +10,7 @@
  * ============================================================
  */
 
-const CACHE_VERSION = 'cams-cache-v4';
+const CACHE_VERSION = 'cams-cache-v7';
 
 const PRECACHE_URLS = [
   './',
@@ -25,6 +25,7 @@ const PRECACHE_URLS = [
   './materials.html',
   './schedule.html',
   './hymns.html',
+  './speakers.html',
   './css/variables.css',
   './css/base.css',
   './css/components.css',
@@ -49,6 +50,7 @@ const PRECACHE_URLS = [
   './js/modules/materials.js',
   './js/modules/schedule.js',
   './js/modules/hymns.js',
+  './js/modules/speakers.js',
 ];
 
 self.addEventListener('install', (event) => {
