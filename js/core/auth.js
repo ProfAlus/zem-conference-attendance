@@ -1,9 +1,11 @@
 // ============================================================
-// AUTH — simple role-based session, backed by a passcode check
-// on the server (see AttendanceService.gs > login()).
-//
-// This is intentionally lightweight: a youth-conference volunteer
-// team, not a bank. Roles: 'admin' and 'volunteer'.
+// AUTH — role-based session, backed by a passcode check on the
+// server (see AttendanceService.gs > login()) that now issues a
+// real session token (see SessionService.gs). The client-side
+// checks here (requireAuth, hasRole) are just UX — redirecting
+// someone to the right page — the actual enforcement happens
+// server-side in Code.gs, which verifies the token on every
+// staff/admin-only action rather than trusting a claimed role.
 // ============================================================
 
 import { CONFIG } from './config.js';
@@ -50,7 +52,7 @@ export function requireAuth(minRole = 'volunteer') {
 
 export async function login(name, passcode) {
   const data = await apiCall('login', { name, passcode });
-  setSession({ role: data.role, name: data.name });
+  setSession({ role: data.role, name: data.name, token: data.token });
   return data;
 }
 
