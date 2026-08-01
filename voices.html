@@ -34,16 +34,14 @@
 
       <div class="card mb-5">
         <h3 id="formTitle" style="margin-bottom:14px;">Ask a question</h3>
+        <div id="formClosedNotice" class="card card-tight" style="display:none; background: var(--color-warning-tint); text-align:center;">
+          <i class="fa-solid fa-lock" style="margin-bottom:6px;"></i>
+          <p id="formClosedMessage" style="margin:0; font-weight:600;">Submissions are currently closed.</p>
+        </div>
         <form id="entryForm">
           <div class="field">
-            <label for="entryName">Your name <span class="text-muted">(optional)</span></label>
-            <input class="input" id="entryName" autocomplete="name">
-          </div>
-          <div class="field">
-            <label class="radio-pill" style="width:fit-content;">
-              <input type="checkbox" id="entryAnonymous">
-              Submit anonymously
-            </label>
+            <label for="entryName">Your name</label>
+            <input class="input" id="entryName" autocomplete="name" required>
           </div>
           <div class="field">
             <label for="entryContent" id="contentLabel">Your question</label>
@@ -52,7 +50,7 @@
           <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
             <i class="fa-solid fa-paper-plane"></i> Submit
           </button>
-          <p class="text-muted" style="text-align:center; font-size:0.8rem; margin-top:10px;">
+          <p class="text-muted" style="text-align:center; font-size:0.8rem; margin-top:10px;" id="reviewNotice">
             Submissions are reviewed before appearing below.
           </p>
         </form>

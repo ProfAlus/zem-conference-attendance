@@ -8,6 +8,7 @@ import { toastError, toastSuccess } from '../core/toast.js';
 import { openModal, confirmDialog } from '../core/modal.js';
 import { escapeHtml, normalizeDriveUrl, formatDate } from '../core/utils.js';
 import { applyBranding } from '../core/theme.js';
+import { getSession } from '../core/auth.js';
 
 const content = renderShell('settings.html', 'Settings', 'admin');
 if (content) init();
@@ -210,9 +211,33 @@ async function init() {
           <p class="text-muted" style="margin:4px 0 0;">Every submission starts hidden — review and show the ones you want public, and choose whether each name is shown.</p>
         </div>
       </div>
+      <div class="flex gap-4 flex-wrap mb-4">
+        <label class="radio-pill" style="width:fit-content;">
+          <input type="checkbox" id="questionsFormEnabled" ${settings.questionsFormEnabled !== false ? 'checked' : ''}>
+          Accepting new questions
+        </label>
+        <label class="radio-pill" style="width:fit-content;">
+          <input type="checkbox" id="testimoniesFormEnabled" ${settings.testimoniesFormEnabled !== false ? 'checked' : ''}>
+          Accepting new testimonies
+        </label>
+      </div>
+      <div class="flex gap-4 flex-wrap mb-4">
+        <label class="radio-pill" style="width:fit-content;">
+          <input type="checkbox" id="autoApproveQuestions" ${settings.autoApproveQuestions ? 'checked' : ''}>
+          Auto-approve questions
+        </label>
+        <label class="radio-pill" style="width:fit-content;">
+          <input type="checkbox" id="autoApproveTestimonies" ${settings.autoApproveTestimonies ? 'checked' : ''}>
+          Auto-approve testimonies
+        </label>
+      </div>
+      <p class="text-muted" style="font-size:0.8rem; margin-top:-8px; margin-bottom:16px;">
+        Turning a form off only hides that submission form on the public page — previously approved entries keep displaying either way.
+        Auto-approve skips the moderation queue for that type — submissions go live the instant they're sent, name shown by default. You can still flip Anonymous or Show on any entry afterward from the table below.
+      </p>
       <div class="table-wrap">
         <table class="data-table">
-          <thead><tr><th>Type</th><th>Name</th><th>Content</th><th>Visible</th><th>Anonymous</th><th></th></tr></thead>
+          <thead><tr><th>Type</th><th>Name</th><th>Content</th><th>Visible</th><th>Anonymous</th><th>Reply</th><th></th></tr></thead>
           <tbody id="submissionsTbody"></tbody>
         </table>
       </div>
@@ -299,6 +324,43 @@ async function init() {
 
   document.getElementById('addGalleryBtn').addEventListener('click', () => openGalleryModal());
   await loadGallery();
+
+  document.getElementById('questionsFormEnabled').addEventListener('change', async (e) => {
+    try {
+      await apiCall('updateSettings', { questionsFormEnabled: e.target.checked });
+      toastSuccess(e.target.checked ? 'Question submissions are open.' : 'Question submissions are closed — existing ones still show.');
+    } catch (err) {
+      toastError(err.message);
+      e.target.checked = !e.target.checked;
+    }
+  });
+  document.getElementById('testimoniesFormEnabled').addEventListener('change', async (e) => {
+    try {
+      await apiCall('updateSettings', { testimoniesFormEnabled: e.target.checked });
+      toastSuccess(e.target.checked ? 'Testimony submissions are open.' : 'Testimony submissions are closed — existing ones still show.');
+    } catch (err) {
+      toastError(err.message);
+      e.target.checked = !e.target.checked;
+    }
+  });
+  document.getElementById('autoApproveQuestions').addEventListener('change', async (e) => {
+    try {
+      await apiCall('updateSettings', { autoApproveQuestions: e.target.checked });
+      toastSuccess(e.target.checked ? 'Questions now auto-approve.' : 'Questions now go through moderation.');
+    } catch (err) {
+      toastError(err.message);
+      e.target.checked = !e.target.checked;
+    }
+  });
+  document.getElementById('autoApproveTestimonies').addEventListener('change', async (e) => {
+    try {
+      await apiCall('updateSettings', { autoApproveTestimonies: e.target.checked });
+      toastSuccess(e.target.checked ? 'Testimonies now auto-approve.' : 'Testimonies now go through moderation.');
+    } catch (err) {
+      toastError(err.message);
+      e.target.checked = !e.target.checked;
+    }
+  });
 
   await loadSubmissions();
 }
@@ -956,24 +1018,32 @@ function openGalleryModal(existing = null) {
 
 async function loadSubmissions() {
   const tbody = document.getElementById('submissionsTbody');
-  tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:16px;"><span class="spinner spinner-dark"></span></td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:16px;"><span class="spinner spinner-dark"></span></td></tr>`;
   try {
     const entries = await apiCall('getAllEntries');
     if (!entries.length) {
-      tbody.innerHTML = `<tr><td colspan="6" class="text-muted" style="text-align:center;padding:16px;">No submissions yet.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" class="text-muted" style="text-align:center;padding:16px;">No submissions yet.</td></tr>`;
       return;
     }
     tbody.innerHTML = entries.map((e) => `
       <tr>
         <td><span class="badge ${e.type === 'Testimony' ? 'badge-gold' : 'badge-neutral'}">${escapeHtml(e.type)}</span></td>
         <td>${escapeHtml(e.name || '\u2014')}</td>
-        <td style="max-width:260px; white-space:normal;">${escapeHtml(e.content.length > 140 ? e.content.slice(0, 140) + '\u2026' : e.content)}</td>
+        <td style="max-width:220px; white-space:normal;">${escapeHtml(e.content.length > 120 ? e.content.slice(0, 120) + '\u2026' : e.content)}</td>
         <td><label class="radio-pill" style="width:fit-content;"><input type="checkbox" class="toggle-visible" data-id="${escapeHtml(e.id)}" ${e.visible ? 'checked' : ''}> Show</label></td>
         <td><label class="radio-pill" style="width:fit-content;"><input type="checkbox" class="toggle-anonymous" data-id="${escapeHtml(e.id)}" ${e.anonymous ? 'checked' : ''}> Anon</label></td>
+        <td>
+          ${e.type === 'Question'
+            ? `<button class="btn btn-sm ${e.reply ? 'btn-outline' : 'btn-primary'} reply-btn" data-id="${escapeHtml(e.id)}"><i class="fa-solid fa-reply"></i> ${e.reply ? 'Edit reply' : 'Reply'}</button>`
+            : '<span class="text-muted" style="font-size:0.8rem;">\u2014</span>'}
+        </td>
         <td><button class="btn btn-sm btn-ghost delete-submission" data-id="${escapeHtml(e.id)}" style="color:var(--color-danger);"><i class="fa-solid fa-trash"></i></button></td>
       </tr>
     `).join('');
 
+    tbody.querySelectorAll('.reply-btn').forEach((btn) => {
+      btn.addEventListener('click', () => openReplyModal(entries.find((x) => x.id === btn.dataset.id)));
+    });
     tbody.querySelectorAll('.toggle-visible').forEach((cb) => {
       cb.addEventListener('change', async () => {
         try {
@@ -1010,8 +1080,38 @@ async function loadSubmissions() {
       });
     });
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="6" class="text-muted" style="text-align:center;padding:16px;">${err.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="text-muted" style="text-align:center;padding:16px;">${err.message}</td></tr>`;
   }
+}
+
+function openReplyModal(entry) {
+  const body = `
+    <div class="card card-tight mb-4" style="background: var(--color-cream-100);">
+      <p style="margin:0; white-space:pre-wrap; font-size:0.9rem;">${escapeHtml(entry.content)}</p>
+      <div class="text-muted" style="font-size:0.75rem; margin-top:6px;">${escapeHtml(entry.name || 'Anonymous')}</div>
+    </div>
+    <div class="field"><label for="replyText">Your response</label>
+      <textarea class="input" id="replyText" rows="5" placeholder="This will show publicly under the question once it's shown.">${escapeHtml(entry.reply || '')}</textarea>
+    </div>
+  `;
+  openModal('Reply to question', body, [
+    { label: 'Cancel', className: 'btn-ghost', onClick: (b) => b.remove() },
+    {
+      label: 'Save reply',
+      className: 'btn-primary',
+      onClick: async (b) => {
+        const reply = document.getElementById('replyText').value.trim();
+        try {
+          await apiCall('replyToEntry', { id: entry.id, reply, repliedBy: getSession()?.name || '' });
+          toastSuccess('Reply saved.');
+          b.remove();
+          loadSubmissions();
+        } catch (err) {
+          toastError(err.message);
+        }
+      },
+    },
+  ]);
 }
 
 function openUserModal(existing = null) {
