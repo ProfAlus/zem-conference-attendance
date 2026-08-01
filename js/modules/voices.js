@@ -113,29 +113,12 @@ function testimonyCardHtml(e) {
   return `
     <div class="testimony-card">
       <div class="card-badge"><i class="fa-solid fa-quote-left"></i></div>
-      <p style="margin:0; white-space:pre-wrap;">${escapeHtml(shown)}</p>
-      ${isTruncated ? `<button class="voice-readmore" data-readmore="${escapeHtml(e.id)}">Read full testimony</button>` : ''}
-      <div class="voice-footer">
-        <div class="voice-avatar" style="background:${color};">${initials}</div>
-        <div>
-          <div class="voice-name">${escapeHtml(e.name || 'Anonymous')}</div>
-          <div class="voice-date">${formatDate(e.date)}</div>
-        </div>
+      <div class="voice-avatar-corner" style="background:${color};">${initials}</div>
+      <div class="testimony-content">
+        <p style="margin:0; white-space:pre-wrap;">${escapeHtml(shown)}</p>
+        ${isTruncated ? `<button class="voice-readmore" data-readmore="${escapeHtml(e.id)}">Read full testimony</button>` : ''}
       </div>
-      ${reactionsHtml(e)}
-    </div>
-  `;
-}
-
-function questionCardHtml(e) {
-  const { shown, isTruncated } = truncated(e.content);
-  return `
-    <div class="question-card">
-      <div class="card-badge"><i class="fa-solid fa-circle-question"></i></div>
-      <p style="margin:0; white-space:pre-wrap;">${escapeHtml(shown)}</p>
-      ${isTruncated ? `<button class="voice-readmore" data-readmore="${escapeHtml(e.id)}">Read full question</button>` : ''}
-      <div class="voice-header">
-        <div class="voice-avatar"><i class="fa-solid fa-user" style="font-size:0.7rem;"></i></div>
+      <div class="voice-footer">
         <div>
           <div class="voice-name">${escapeHtml(e.name || 'Anonymous')}</div>
           <div class="voice-date">${formatDate(e.date)}</div>
@@ -147,7 +130,36 @@ function questionCardHtml(e) {
           <p style="margin:0; white-space:pre-wrap; font-size:0.9rem;">${escapeHtml(e.reply)}</p>
         </div>
       ` : ''}
-      ${reactionsHtml(e)}
+      ${e.reactionsEnabled !== false ? reactionsHtml(e) : ''}
+    </div>
+  `;
+}
+
+function questionCardHtml(e) {
+  const { shown, isTruncated } = truncated(e.content);
+  return `
+    <div class="question-card">
+      <i class="fa-solid fa-question qmark-watermark"></i>
+      <div class="card-badge"><i class="fa-solid fa-circle-question"></i></div>
+      <div class="qcontent">
+        <div class="q-label">Question</div>
+        <p style="margin:0; white-space:pre-wrap;">${escapeHtml(shown)}</p>
+        ${isTruncated ? `<button class="voice-readmore" data-readmore="${escapeHtml(e.id)}">Read full question</button>` : ''}
+        <div class="voice-header">
+          <div class="voice-avatar"><i class="fa-solid fa-user" style="font-size:0.7rem;"></i></div>
+          <div>
+            <div class="voice-name">${escapeHtml(e.name || 'Anonymous')}</div>
+            <div class="voice-date">${formatDate(e.date)}</div>
+          </div>
+        </div>
+        ${e.reply ? `
+          <div class="reply-box">
+            <div style="font-weight:600; font-size:0.8rem; color: var(--color-coral); margin-bottom:4px;"><i class="fa-solid fa-reply"></i> Response from ${escapeHtml(e.repliedBy || 'Admin')}</div>
+            <p style="margin:0; white-space:pre-wrap; font-size:0.9rem;">${escapeHtml(e.reply)}</p>
+          </div>
+        ` : ''}
+        ${e.reactionsEnabled !== false ? reactionsHtml(e) : ''}
+      </div>
     </div>
   `;
 }

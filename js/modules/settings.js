@@ -14,6 +14,13 @@ const content = renderShell('settings.html', 'Settings', 'admin');
 if (content) init();
 
 let dayLabels = [];
+
+const BANNER_THEME_OPTIONS = [
+  { key: 'midnight-gold', label: 'Midnight Gold', bg1: '#0a0817', bg2: '#2b0d14', accent: '#F2B705' },
+  { key: 'ocean-teal', label: 'Ocean Teal', bg1: '#062b2b', bg2: '#0a4a4a', accent: '#2dd4bf' },
+  { key: 'royal-purple', label: 'Royal Purple', bg1: '#1a0b2e', bg2: '#3b0764', accent: '#c084fc' },
+  { key: 'sunset-coral', label: 'Sunset Coral', bg1: '#3d0f0f', bg2: '#7a1f0d', accent: '#FF6B4E' },
+];
 let conferenceDays = 3;
 
 async function init() {
@@ -112,6 +119,57 @@ async function init() {
           <tbody id="usersTbody"></tbody>
         </table>
       </div>
+    </div>
+
+    <div class="card mt-6">
+      <div class="flex-between mb-4">
+        <div>
+          <h3 style="margin:0;">Event banner (materials.html)</h3>
+          <p class="text-muted" style="margin:4px 0 0;">Animated hero banner shown at the top of the public Materials page.</p>
+        </div>
+      </div>
+      <form id="bannerForm">
+        <div class="field">
+          <label class="radio-pill" style="width:fit-content;">
+            <input type="checkbox" id="bannerEnabled" ${settings.bannerEnabled !== false ? 'checked' : ''}>
+            Show event banner
+          </label>
+        </div>
+        <div class="field">
+          <label for="bannerLiveMessage">Message shown while the conference is ongoing</label>
+          <input class="input" id="bannerLiveMessage" value="${escapeHtml(settings.bannerLiveMessage || '')}" placeholder="We're live right now — join us!">
+          <div class="hint">
+            Uses your Start Date / Daily Start Time / Number of Days above to know which state to show:
+            a countdown before the conference starts, this message while it's ongoing, and nothing at all once the last day has ended.
+          </div>
+        </div>
+        <div class="field">
+          <label>Colour theme</label>
+          <div class="flex gap-3 flex-wrap" id="bannerThemeSwatches">
+            ${BANNER_THEME_OPTIONS.map((t) => `
+              <label class="banner-swatch-option">
+                <input type="radio" name="bannerThemeRadio" value="${t.key}" ${settings.bannerTheme === t.key || (!settings.bannerTheme && t.key === 'midnight-gold') ? 'checked' : ''}>
+                <span class="banner-swatch" style="background: linear-gradient(135deg, ${t.bg1}, ${t.bg2});"><span style="background:${t.accent};"></span></span>
+                <span class="banner-swatch-label">${t.label}</span>
+              </label>
+            `).join('')}
+            <label class="banner-swatch-option">
+              <input type="radio" name="bannerThemeRadio" value="custom" ${settings.bannerTheme === 'custom' ? 'checked' : ''}>
+              <span class="banner-swatch banner-swatch--custom"><i class="fa-solid fa-palette"></i></span>
+              <span class="banner-swatch-label">Custom</span>
+            </label>
+          </div>
+        </div>
+        <div class="field" id="bannerCustomColors" style="display:${settings.bannerTheme === 'custom' ? 'flex' : 'none'}; gap:20px; flex-wrap:wrap;">
+          <div><label for="bannerCustomBg1">Background start</label><br><input type="color" id="bannerCustomBg1" value="${settings.bannerCustomBg1 || '#0a0817'}" style="width:56px; height:36px; padding:2px; border-radius:6px;"></div>
+          <div><label for="bannerCustomBg2">Background end</label><br><input type="color" id="bannerCustomBg2" value="${settings.bannerCustomBg2 || '#2b0d14'}" style="width:56px; height:36px; padding:2px; border-radius:6px;"></div>
+          <div><label for="bannerCustomAccent">Accent (text &amp; highlights)</label><br><input type="color" id="bannerCustomAccent" value="${settings.bannerCustomAccent || '#F2B705'}" style="width:56px; height:36px; padding:2px; border-radius:6px;"></div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-4"><i class="fa-solid fa-floppy-disk"></i> Save banner settings</button>
+      </form>
+      <p class="text-muted" style="font-size:0.8rem; margin-top:8px;">
+        <a href="materials.html" target="_blank" rel="noopener">Preview the Materials page &rarr;</a>
+      </p>
     </div>
 
     <div class="card mt-6">
@@ -235,15 +293,35 @@ async function init() {
         Turning a form off only hides that submission form on the public page — previously approved entries keep displaying either way.
         Auto-approve skips the moderation queue for that type — submissions go live the instant they're sent, name shown by default. You can still flip Anonymous or Show on any entry afterward from the table below.
       </p>
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead><tr><th>Type</th><th>Name</th><th>Content</th><th>Visible</th><th>Anonymous</th><th>Reply</th><th></th></tr></thead>
-          <tbody id="submissionsTbody"></tbody>
-        </table>
-      </div>
-      <p class="text-muted" style="font-size:0.8rem; margin-top:8px;">
+      <p class="text-muted" style="font-size:0.8rem; margin-top:-8px; margin-bottom:16px;">
+        Turning a form off only hides that submission form on the public page — previously approved entries keep displaying either way.
+        Auto-approve skips the moderation queue for that type — submissions go live the instant they're sent, name shown by default. You can still flip Anonymous or Show on any entry afterward from the tables below.
+      </p>
+      <p class="text-muted" style="font-size:0.8rem;">
         <a href="voices.html" target="_blank" rel="noopener">View the public Questions &amp; Testimonies page &rarr;</a>
       </p>
+    </div>
+
+    <div class="card mt-6">
+      <h3 style="margin-bottom:4px;">Questions</h3>
+      <p class="text-muted" style="margin:0 0 16px;">Questions can always be replied to.</p>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Content</th><th>Visible</th><th>Anonymous</th><th>Reactions</th><th>Reply</th><th></th></tr></thead>
+          <tbody id="questionsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card mt-6">
+      <h3 style="margin-bottom:4px;">Testimonies</h3>
+      <p class="text-muted" style="margin:0 0 16px;">Reply is off by default for testimonies — turn on "Allow reply" for a specific one before you can respond to it.</p>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Content</th><th>Visible</th><th>Anonymous</th><th>Reactions</th><th>Allow reply</th><th>Reply</th><th></th></tr></thead>
+          <tbody id="testimoniesTbody"></tbody>
+        </table>
+      </div>
     </div>
 
     <div class="card mt-6">
@@ -309,6 +387,32 @@ async function init() {
 
   document.getElementById('addUserBtn').addEventListener('click', () => openUserModal());
   await loadUsers();
+
+  document.querySelectorAll('input[name="bannerThemeRadio"]').forEach((radio) => {
+    radio.addEventListener('change', () => {
+      document.getElementById('bannerCustomColors').style.display = radio.value === 'custom' && radio.checked ? 'flex' : 'none';
+    });
+  });
+  document.getElementById('bannerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const selectedTheme = document.querySelector('input[name="bannerThemeRadio"]:checked')?.value || 'midnight-gold';
+    const payload = {
+      bannerEnabled: document.getElementById('bannerEnabled').checked,
+      bannerLiveMessage: document.getElementById('bannerLiveMessage').value.trim(),
+      bannerTheme: selectedTheme,
+    };
+    if (selectedTheme === 'custom') {
+      payload.bannerCustomBg1 = document.getElementById('bannerCustomBg1').value;
+      payload.bannerCustomBg2 = document.getElementById('bannerCustomBg2').value;
+      payload.bannerCustomAccent = document.getElementById('bannerCustomAccent').value;
+    }
+    try {
+      await apiCall('updateSettings', payload);
+      toastSuccess('Banner settings saved.');
+    } catch (err) {
+      toastError(err.message);
+    }
+  });
 
   document.getElementById('addMaterialBtn').addEventListener('click', () => openMaterialModal());
   await loadMaterials();
@@ -1017,71 +1121,138 @@ function openGalleryModal(existing = null) {
 }
 
 async function loadSubmissions() {
-  const tbody = document.getElementById('submissionsTbody');
-  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:16px;"><span class="spinner spinner-dark"></span></td></tr>`;
+  const qTbody = document.getElementById('questionsTbody');
+  const tTbody = document.getElementById('testimoniesTbody');
+  qTbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:16px;"><span class="spinner spinner-dark"></span></td></tr>`;
+  tTbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:16px;"><span class="spinner spinner-dark"></span></td></tr>`;
   try {
     const entries = await apiCall('getAllEntries');
-    if (!entries.length) {
-      tbody.innerHTML = `<tr><td colspan="7" class="text-muted" style="text-align:center;padding:16px;">No submissions yet.</td></tr>`;
-      return;
-    }
-    tbody.innerHTML = entries.map((e) => `
-      <tr>
-        <td><span class="badge ${e.type === 'Testimony' ? 'badge-gold' : 'badge-neutral'}">${escapeHtml(e.type)}</span></td>
-        <td>${escapeHtml(e.name || '\u2014')}</td>
-        <td style="max-width:220px; white-space:normal;">${escapeHtml(e.content.length > 120 ? e.content.slice(0, 120) + '\u2026' : e.content)}</td>
-        <td><label class="radio-pill" style="width:fit-content;"><input type="checkbox" class="toggle-visible" data-id="${escapeHtml(e.id)}" ${e.visible ? 'checked' : ''}> Show</label></td>
-        <td><label class="radio-pill" style="width:fit-content;"><input type="checkbox" class="toggle-anonymous" data-id="${escapeHtml(e.id)}" ${e.anonymous ? 'checked' : ''}> Anon</label></td>
-        <td>
-          ${e.type === 'Question'
-            ? `<button class="btn btn-sm ${e.reply ? 'btn-outline' : 'btn-primary'} reply-btn" data-id="${escapeHtml(e.id)}"><i class="fa-solid fa-reply"></i> ${e.reply ? 'Edit reply' : 'Reply'}</button>`
-            : '<span class="text-muted" style="font-size:0.8rem;">\u2014</span>'}
-        </td>
-        <td><button class="btn btn-sm btn-ghost delete-submission" data-id="${escapeHtml(e.id)}" style="color:var(--color-danger);"><i class="fa-solid fa-trash"></i></button></td>
-      </tr>
-    `).join('');
-
-    tbody.querySelectorAll('.reply-btn').forEach((btn) => {
-      btn.addEventListener('click', () => openReplyModal(entries.find((x) => x.id === btn.dataset.id)));
-    });
-    tbody.querySelectorAll('.toggle-visible').forEach((cb) => {
-      cb.addEventListener('change', async () => {
-        try {
-          await apiCall('updateSubmission', { id: cb.dataset.id, visible: cb.checked });
-          toastSuccess(cb.checked ? 'Now showing publicly.' : 'Hidden from public view.');
-        } catch (err) {
-          toastError(err.message);
-          cb.checked = !cb.checked;
-        }
-      });
-    });
-    tbody.querySelectorAll('.toggle-anonymous').forEach((cb) => {
-      cb.addEventListener('change', async () => {
-        try {
-          await apiCall('updateSubmission', { id: cb.dataset.id, anonymous: cb.checked });
-          toastSuccess(cb.checked ? 'Name will be hidden.' : 'Name will be shown.');
-        } catch (err) {
-          toastError(err.message);
-          cb.checked = !cb.checked;
-        }
-      });
-    });
-    tbody.querySelectorAll('.delete-submission').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        const ok = await confirmDialog('Permanently delete this submission?', { title: 'Delete submission', confirmLabel: 'Delete', danger: true });
-        if (!ok) return;
-        try {
-          await apiCall('deleteSubmission', { id: btn.dataset.id });
-          toastSuccess('Submission deleted.');
-          loadSubmissions();
-        } catch (err) {
-          toastError(err.message);
-        }
-      });
-    });
+    const questions = entries.filter((e) => e.type === 'Question');
+    const testimonies = entries.filter((e) => e.type === 'Testimony');
+    renderQuestionsTable(questions);
+    renderTestimoniesTable(testimonies);
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-muted" style="text-align:center;padding:16px;">${err.message}</td></tr>`;
+    qTbody.innerHTML = `<tr><td colspan="7" class="text-muted" style="text-align:center;padding:16px;">${err.message}</td></tr>`;
+    tTbody.innerHTML = `<tr><td colspan="8" class="text-muted" style="text-align:center;padding:16px;">${err.message}</td></tr>`;
   }
+}
+
+function entryPreview(e) {
+  return escapeHtml(e.content.length > 120 ? e.content.slice(0, 120) + '\u2026' : e.content);
+}
+
+function wireCommonToggles(tbody) {
+  tbody.querySelectorAll('.toggle-visible').forEach((cb) => {
+    cb.addEventListener('change', async () => {
+      try {
+        await apiCall('updateSubmission', { id: cb.dataset.id, visible: cb.checked });
+        toastSuccess(cb.checked ? 'Now showing publicly.' : 'Hidden from public view.');
+      } catch (err) {
+        toastError(err.message);
+        cb.checked = !cb.checked;
+      }
+    });
+  });
+  tbody.querySelectorAll('.toggle-anonymous').forEach((cb) => {
+    cb.addEventListener('change', async () => {
+      try {
+        await apiCall('updateSubmission', { id: cb.dataset.id, anonymous: cb.checked });
+        toastSuccess(cb.checked ? 'Name will be hidden.' : 'Name will be shown.');
+      } catch (err) {
+        toastError(err.message);
+        cb.checked = !cb.checked;
+      }
+    });
+  });
+  tbody.querySelectorAll('.toggle-reactions').forEach((cb) => {
+    cb.addEventListener('change', async () => {
+      try {
+        await apiCall('updateSubmission', { id: cb.dataset.id, reactionsEnabled: cb.checked });
+        toastSuccess(cb.checked ? 'Reactions enabled for this entry.' : 'Reactions turned off for this entry.');
+      } catch (err) {
+        toastError(err.message);
+        cb.checked = !cb.checked;
+      }
+    });
+  });
+  tbody.querySelectorAll('.delete-submission').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const ok = await confirmDialog('Permanently delete this submission?', { title: 'Delete submission', confirmLabel: 'Delete', danger: true });
+      if (!ok) return;
+      try {
+        await apiCall('deleteSubmission', { id: btn.dataset.id });
+        toastSuccess('Submission deleted.');
+        loadSubmissions();
+      } catch (err) {
+        toastError(err.message);
+      }
+    });
+  });
+}
+
+function renderQuestionsTable(questions) {
+  const tbody = document.getElementById('questionsTbody');
+  if (!questions.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-muted" style="text-align:center;padding:16px;">No questions yet.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = questions.map((e) => `
+    <tr>
+      <td>${escapeHtml(e.name || '\u2014')}</td>
+      <td style="max-width:220px; white-space:normal;">${entryPreview(e)}</td>
+      <td><label class="radio-pill" style="width:fit-content;"><input type="checkbox" class="toggle-visible" data-id="${escapeHtml(e.id)}" ${e.visible ? 'checked' : ''}> Show</label></td>
+      <td><label class="radio-pill" style="width:fit-content;"><input type="checkbox" class="toggle-anonymous" data-id="${escapeHtml(e.id)}" ${e.anonymous ? 'checked' : ''}> Anon</label></td>
+      <td><label class="radio-pill" style="width:fit-content;"><input type="checkbox" class="toggle-reactions" data-id="${escapeHtml(e.id)}" ${e.reactionsEnabled !== false ? 'checked' : ''}> On</label></td>
+      <td><button class="btn btn-sm ${e.reply ? 'btn-outline' : 'btn-primary'} reply-btn" data-id="${escapeHtml(e.id)}"><i class="fa-solid fa-reply"></i> ${e.reply ? 'Edit reply' : 'Reply'}</button></td>
+      <td><button class="btn btn-sm btn-ghost delete-submission" data-id="${escapeHtml(e.id)}" style="color:var(--color-danger);"><i class="fa-solid fa-trash"></i></button></td>
+    </tr>
+  `).join('');
+
+  tbody.querySelectorAll('.reply-btn').forEach((btn) => {
+    btn.addEventListener('click', () => openReplyModal(questions.find((x) => x.id === btn.dataset.id)));
+  });
+  wireCommonToggles(tbody);
+}
+
+function renderTestimoniesTable(testimonies) {
+  const tbody = document.getElementById('testimoniesTbody');
+  if (!testimonies.length) {
+    tbody.innerHTML = `<tr><td colspan="8" class="text-muted" style="text-align:center;padding:16px;">No testimonies yet.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = testimonies.map((e) => `
+    <tr>
+      <td>${escapeHtml(e.name || '\u2014')}</td>
+      <td style="max-width:200px; white-space:normal;">${entryPreview(e)}</td>
+      <td><label class="radio-pill" style="width:fit-content;"><input type="checkbox" class="toggle-visible" data-id="${escapeHtml(e.id)}" ${e.visible ? 'checked' : ''}> Show</label></td>
+      <td><label class="radio-pill" style="width:fit-content;"><input type="checkbox" class="toggle-anonymous" data-id="${escapeHtml(e.id)}" ${e.anonymous ? 'checked' : ''}> Anon</label></td>
+      <td><label class="radio-pill" style="width:fit-content;"><input type="checkbox" class="toggle-reactions" data-id="${escapeHtml(e.id)}" ${e.reactionsEnabled !== false ? 'checked' : ''}> On</label></td>
+      <td><label class="radio-pill" style="width:fit-content;"><input type="checkbox" class="toggle-reply-enabled" data-id="${escapeHtml(e.id)}" ${e.replyEnabled ? 'checked' : ''}> Allow</label></td>
+      <td>
+        ${e.replyEnabled
+          ? `<button class="btn btn-sm ${e.reply ? 'btn-outline' : 'btn-primary'} reply-btn" data-id="${escapeHtml(e.id)}"><i class="fa-solid fa-reply"></i> ${e.reply ? 'Edit reply' : 'Reply'}</button>`
+          : '<span class="text-muted" style="font-size:0.8rem;">Turn on Allow first</span>'}
+      </td>
+      <td><button class="btn btn-sm btn-ghost delete-submission" data-id="${escapeHtml(e.id)}" style="color:var(--color-danger);"><i class="fa-solid fa-trash"></i></button></td>
+    </tr>
+  `).join('');
+
+  tbody.querySelectorAll('.reply-btn').forEach((btn) => {
+    btn.addEventListener('click', () => openReplyModal(testimonies.find((x) => x.id === btn.dataset.id)));
+  });
+  tbody.querySelectorAll('.toggle-reply-enabled').forEach((cb) => {
+    cb.addEventListener('change', async () => {
+      try {
+        await apiCall('updateSubmission', { id: cb.dataset.id, replyEnabled: cb.checked });
+        toastSuccess(cb.checked ? 'Reply enabled for this testimony.' : 'Reply disabled for this testimony.');
+        loadSubmissions(); // refresh so the Reply button appears/disappears correctly
+      } catch (err) {
+        toastError(err.message);
+        cb.checked = !cb.checked;
+      }
+    });
+  });
+  wireCommonToggles(tbody);
 }
 
 function openReplyModal(entry) {
@@ -1091,18 +1262,25 @@ function openReplyModal(entry) {
       <div class="text-muted" style="font-size:0.75rem; margin-top:6px;">${escapeHtml(entry.name || 'Anonymous')}</div>
     </div>
     <div class="field"><label for="replyText">Your response</label>
-      <textarea class="input" id="replyText" rows="5" placeholder="This will show publicly under the question once it's shown.">${escapeHtml(entry.reply || '')}</textarea>
+      <textarea class="input" id="replyText" rows="5" placeholder="This will show publicly under the ${entry.type === 'Testimony' ? 'testimony' : 'question'} once it's shown.">${escapeHtml(entry.reply || '')}</textarea>
+    </div>
+    <div class="field">
+      <label class="radio-pill" style="width:fit-content;">
+        <input type="checkbox" id="replyAnonymous" ${entry.replyAnonymous ? 'checked' : ''}>
+        Show as "Admin" instead of my name
+      </label>
     </div>
   `;
-  openModal('Reply to question', body, [
+  openModal(`Reply to ${entry.type === 'Testimony' ? 'testimony' : 'question'}`, body, [
     { label: 'Cancel', className: 'btn-ghost', onClick: (b) => b.remove() },
     {
       label: 'Save reply',
       className: 'btn-primary',
       onClick: async (b) => {
         const reply = document.getElementById('replyText').value.trim();
+        const replyAnonymous = document.getElementById('replyAnonymous').checked;
         try {
-          await apiCall('replyToEntry', { id: entry.id, reply, repliedBy: getSession()?.name || '' });
+          await apiCall('replyToEntry', { id: entry.id, reply, repliedBy: getSession()?.name || '', replyAnonymous });
           toastSuccess('Reply saved.');
           b.remove();
           loadSubmissions();

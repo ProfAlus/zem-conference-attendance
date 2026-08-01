@@ -43,7 +43,7 @@
 }
 
 /* ---------- Voices grid (Questions & Testimonies) ---------- */
-.voices-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 34px 24px; align-items: start; }
+.voices-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px 24px; align-items: start; overflow: visible; }
 
 .voice-avatar {
   width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
@@ -52,47 +52,66 @@
   object-fit: cover;
 }
 
-/* Both card types below share one reliable pattern: a solid-colour
-   ribbon badge with a real icon, overlapping the card's top edge —
-   the same approach the Quotes card already uses well. Differentiated
-   by badge colour/icon and a small structural difference, not by
-   fragile CSS tricks (a prior version used a clip-path speech-bubble
-   tail and a text-stroke outlined glyph — both rendered inconsistently
-   across browsers, which is why they got replaced). */
+/* Shared ribbon badge — solid colour, real icon, overlapping the card's
+   top-left corner. Explicit overflow:visible on every ancestor below
+   guarantees it never gets clipped. */
+.card-badge {
+  position: absolute; top: -16px; left: 26px; width: 44px; height: 44px;
+  border-radius: 8px 8px 8px 0; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 14px rgba(27,22,64,0.25); z-index: 3;
+}
+.card-badge i { color: #fff; font-size: 1.15rem; }
 
-/* Testimonial: teal quote badge, avatar + name in the footer */
+/* Testimonial — closer to the Aajjo-style reference: a large circular
+   photo/avatar overlapping the top-right corner (the person), plus the
+   quote-type ribbon badge top-left (consistent with Quotes/Questions). */
 .testimony-card {
-  position: relative; background: var(--color-surface); border-radius: var(--radius-lg);
-  padding: 30px var(--sp-5) var(--sp-5); box-shadow: var(--shadow-md); margin-top: 14px;
+  position: relative; overflow: visible; background: var(--color-surface);
+  border-radius: var(--radius-lg); padding: 30px 24px 22px; box-shadow: var(--shadow-lg);
+  margin-top: 16px;
 }
 .testimony-card .card-badge { background: var(--color-teal); }
-.testimony-card .voice-avatar { background: var(--color-teal); }
-.testimony-card .voice-footer { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--color-ink-200); }
+.testimony-card .voice-avatar-corner {
+  position: absolute; top: -18px; right: 22px; width: 62px; height: 62px;
+  border-radius: 50%; border: 4px solid var(--color-surface); box-shadow: 0 6px 14px rgba(27,22,64,0.25);
+  z-index: 3; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; color: #fff;
+  background: var(--color-teal); object-fit: cover;
+}
+.testimony-card .testimony-content { margin-top: 8px; }
+.testimony-card .voice-footer { display: flex; align-items: center; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--color-ink-200); }
 .testimony-card .voice-name { font-weight: 700; color: var(--color-ink-900); font-size: 0.95rem; }
 .testimony-card .voice-date { font-size: 0.75rem; color: var(--color-ink-500); }
+.testimony-card .reply-box { background: var(--color-cream-100); border-radius: var(--radius-sm); padding: 12px 14px; margin-top: 14px; }
 
-/* Question: navy question badge, asker + reply shown inline below the question */
+/* Question — the ribbon badge plus a large solid question-mark icon as a
+   soft background watermark (a reliable colour+opacity icon, not the
+   earlier text-stroke-outlined glyph, which is what actually rendered
+   inconsistently). Left accent bar keeps it visually distinct from
+   testimonies at a glance even before reading either. */
 .question-card {
-  position: relative; background: var(--color-surface); border-radius: var(--radius-lg);
-  padding: 30px var(--sp-5) var(--sp-5); box-shadow: var(--shadow-md); margin-top: 14px;
-  border-left: 3px solid var(--color-coral);
+  position: relative; overflow: visible; background: var(--color-surface);
+  border-radius: var(--radius-lg); padding: 30px 22px 22px; box-shadow: var(--shadow-lg);
+  margin-top: 16px; border-left: 4px solid var(--color-coral);
 }
 .question-card .card-badge { background: var(--color-ink-900); }
-.question-card .voice-header { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--color-ink-200); }
+.question-card .qmark-watermark {
+  position: absolute; right: 10px; bottom: 6px; font-size: 5.5rem; line-height: 1;
+  color: var(--color-coral); opacity: 0.08; z-index: 0; pointer-events: none;
+}
+.question-card .q-label {
+  font-family: var(--font-display); font-weight: 800; color: var(--color-coral);
+  font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+  margin-bottom: 8px; position: relative; z-index: 1;
+}
+.question-card .qcontent { position: relative; z-index: 1; }
+.question-card .voice-header { display: flex; align-items: center; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--color-ink-200); position: relative; z-index: 1; }
 .question-card .voice-avatar { width: 34px; height: 34px; background: var(--color-ink-200); color: var(--color-ink-700); border-radius: 50%; font-size: 0.8rem; }
 .question-card .voice-name { font-weight: 700; color: var(--color-ink-900); font-size: 0.85rem; }
 .question-card .voice-date { font-size: 0.72rem; color: var(--color-ink-500); }
-.question-card .reply-box { background: var(--color-cream-100); border-radius: var(--radius-sm); padding: 12px 14px; margin-top: 12px; }
+.question-card .reply-box { background: var(--color-cream-100); border-radius: var(--radius-sm); padding: 12px 14px; margin-top: 14px; position: relative; z-index: 1; }
 
-/* Shared ribbon badge — same shape/position as the Quotes card badge */
-.card-badge {
-  position: absolute; top: -14px; left: 24px; width: 40px; height: 40px;
-  border-radius: 8px 8px 8px 0; display: flex; align-items: center; justify-content: center;
-  box-shadow: var(--shadow-sm);
-}
-.card-badge i { color: #fff; font-size: 1rem; }
-
-.voice-readmore { background: none; border: none; color: var(--color-coral-dark); font-weight: 600; font-size: 0.85rem; cursor: pointer; padding: 0; margin-top: 6px; }
+.voice-readmore { background: none; border: none; color: var(--color-coral-dark); font-weight: 600; font-size: 0.85rem; cursor: pointer; padding: 0; margin-top: 6px; position: relative; z-index: 1; }
 .voice-readmore:hover { text-decoration: underline; }
 
 /* ---------- Quote card (staff-posted, ribbon badge + colour stripe) ---------- */
@@ -396,3 +415,151 @@ table.data-table tr:hover td { background: var(--color-cream-50); }
 .mt-6 { margin-top: var(--sp-6); }
 .mb-4 { margin-bottom: var(--sp-4); }
 .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--sp-5); }
+
+/* ============================================================
+   EVENT BANNER — animated hero banner for materials.html, built
+   from the ZEM conference flyer's premium black/gold/red look.
+   Pure CSS + a small JS countdown, no image assets.
+   ============================================================ */
+.event-banner {
+  --banner-bg1: #0a0817; --banner-bg2: #2b0d14; --banner-accent: #F2B705;
+  --banner-accent-rgb: 242, 183, 5;
+  position: relative; overflow: hidden;
+  background: linear-gradient(135deg, var(--banner-bg1) 0%, #1B1640 45%, var(--banner-bg2) 100%);
+  padding: 0; box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+}
+.event-banner-glow {
+  position: absolute; width: 60vw; height: 60vw; max-width: 700px; max-height: 700px;
+  border-radius: 50%; filter: blur(90px); opacity: 0.35; pointer-events: none; z-index: 0;
+}
+.event-banner-glow--gold { background: var(--banner-accent); top: -25%; left: -10%; animation: bannerFloat1 14s ease-in-out infinite; }
+.event-banner-glow--red { background: var(--banner-bg2); bottom: -30%; right: -10%; animation: bannerFloat2 16s ease-in-out infinite; }
+@keyframes bannerFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(6%, 4%) scale(1.1); }
+}
+@keyframes bannerFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-5%, -6%) scale(1.08); }
+}
+
+.event-banner-inner {
+  position: relative; z-index: 1; max-width: 720px; margin: 0 auto;
+  padding: 36px 24px 28px; text-align: center;
+  animation: bannerFadeUp 0.7s ease both;
+}
+@keyframes bannerFadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.event-banner-top { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+.event-banner-presents {
+  color: rgba(255,255,255,0.65); font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase;
+}
+.event-banner-days {
+  display: flex; align-items: baseline; gap: 4px; padding: 4px 14px 4px 10px;
+  background: linear-gradient(135deg, var(--banner-bg2), var(--banner-bg1)); border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.45); transform: rotate(-2deg);
+  animation: bannerPulse 2.4s ease-in-out infinite;
+}
+.event-banner-days .num { font-family: var(--font-display); font-weight: 700; font-size: 1.4rem; color: var(--banner-accent); }
+.event-banner-days .word { font-family: var(--font-display); font-weight: 700; font-size: 0.85rem; color: #fff; text-transform: uppercase; letter-spacing: 0.04em; }
+@keyframes bannerPulse {
+  0%, 100% { box-shadow: 0 4px 14px rgba(0,0,0,0.45); }
+  50% { box-shadow: 0 4px 22px rgba(var(--banner-accent-rgb), 0.4); }
+}
+
+.event-banner-title {
+  color: #fff; font-size: clamp(1.3rem, 4vw, 1.9rem); margin: 0 0 14px; line-height: 1.25;
+}
+
+.event-banner-theme {
+  color: rgba(255,255,255,0.92); font-size: clamp(0.95rem, 2.5vw, 1.1rem); margin-bottom: 20px;
+  display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
+}
+.event-banner-theme-label {
+  font-family: var(--font-display); font-weight: 700; font-size: 0.68rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #0a0817; background: var(--banner-accent); padding: 3px 9px; border-radius: 4px;
+}
+.event-banner-shimmer {
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--banner-accent) 0%, #fff6d8 25%, var(--banner-accent) 50%, #fff6d8 75%, var(--banner-accent) 100%);
+  background-size: 250% auto; -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: bannerShimmer 4s linear infinite;
+}
+@keyframes bannerShimmer { to { background-position: -250% center; } }
+.event-banner-flame {
+  color: var(--banner-accent); animation: bannerFlame 1.6s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px rgba(var(--banner-accent-rgb), 0.6));
+}
+@keyframes bannerFlame {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.15) translateY(-2px); }
+}
+
+.event-banner-meta {
+  display: flex; align-items: center; justify-content: center; gap: 18px; flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.event-banner-meta-item {
+  color: rgba(255,255,255,0.85); font-size: 0.85rem; display: flex; align-items: center; gap: 7px;
+}
+.event-banner-meta-item i { color: var(--banner-accent); }
+
+.event-banner-countdown { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; min-height: 30px; }
+.cd-unit {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 58px; padding: 8px 0; border-radius: 8px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(var(--banner-accent-rgb), 0.25);
+}
+.cd-num { font-family: var(--font-mono); font-weight: 700; font-size: 1.25rem; color: var(--banner-accent); line-height: 1; }
+.cd-label { font-size: 0.62rem; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 3px; }
+.cd-live { color: var(--banner-accent); font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+.cd-live i { animation: bannerPulse 1.4s ease-in-out infinite; }
+
+.event-banner-free {
+  display: inline-flex; align-items: center; gap: 8px; color: #0a0817; background: var(--banner-accent);
+  font-weight: 700; font-size: 0.8rem; padding: 8px 16px; border-radius: 999px;
+  box-shadow: 0 0 0 0 rgba(var(--banner-accent-rgb), 0.6); animation: bannerFreePulse 2.6s ease-in-out infinite;
+}
+@keyframes bannerFreePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--banner-accent-rgb), 0.45); }
+  50% { box-shadow: 0 0 0 8px rgba(var(--banner-accent-rgb), 0); }
+}
+
+.event-banner-ticker {
+  position: relative; z-index: 1; background: rgba(0,0,0,0.35); border-top: 1px solid rgba(var(--banner-accent-rgb), 0.2);
+  overflow: hidden; white-space: nowrap; padding: 10px 0;
+}
+.ticker-track { display: inline-flex; gap: 40px; animation: bannerTicker 32s linear infinite; }
+.ticker-track span {
+  display: inline-flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.85);
+  font-size: 0.8rem; font-weight: 500; white-space: nowrap;
+}
+.ticker-track span i { color: var(--banner-accent); font-size: 0.75rem; }
+@keyframes bannerTicker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+@media (max-width: 600px) {
+  .event-banner-inner { padding: 28px 16px 20px; }
+  .event-banner-meta { gap: 10px 16px; }
+  .cd-unit { width: 50px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .event-banner-glow, .event-banner-days, .event-banner-shimmer, .event-banner-flame,
+  .event-banner-free, .ticker-track, .cd-live i { animation: none; }
+}
+
+/* ---------- Banner theme swatches (Settings) ---------- */
+.banner-swatch-option { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+.banner-swatch-option input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+.banner-swatch {
+  width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  border: 2px solid transparent; transition: border-color 0.15s ease;
+}
+.banner-swatch span { width: 14px; height: 14px; border-radius: 50%; box-shadow: 0 0 0 2px rgba(255,255,255,0.8); }
+.banner-swatch--custom { background: var(--color-cream-100); color: var(--color-ink-500); font-size: 1rem; }
+.banner-swatch-option input:checked + .banner-swatch { border-color: var(--color-coral); }
+.banner-swatch-label { font-size: 0.72rem; color: var(--color-ink-700); }
