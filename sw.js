@@ -10,7 +10,7 @@
  * ============================================================
  */
 
-const CACHE_VERSION = 'cams-cache-v14';
+const CACHE_VERSION = 'cams-cache-v16';
 
 const PRECACHE_URLS = [
   './',
@@ -28,6 +28,8 @@ const PRECACHE_URLS = [
   './speakers.html',
   './gallery.html',
   './voices.html',
+  './quotes.html',
+  './quote-manager.html',
   './css/variables.css',
   './css/base.css',
   './css/components.css',
@@ -55,6 +57,8 @@ const PRECACHE_URLS = [
   './js/modules/speakers.js',
   './js/modules/gallery.js',
   './js/modules/voices.js',
+  './js/modules/quotes.js',
+  './js/modules/quote-manager.js',
   './js/core/lightbox.js',
 ];
 

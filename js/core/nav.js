@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: 'dashboard.html', icon: 'fa-gauge-high', label: 'Dashboard', role: 'volunteer' },
   { href: 'scanner.html', icon: 'fa-qrcode', label: 'Attendance Scanner', role: 'volunteer' },
   { href: 'participants.html', icon: 'fa-users', label: 'Participants', role: 'volunteer' },
+  { href: 'quote-manager.html', icon: 'fa-quote-left', label: 'Quotes', role: 'volunteer' },
   { href: 'reports.html', icon: 'fa-file-lines', label: 'Reports', role: 'admin' },
   { href: 'materials.html', icon: 'fa-folder-open', label: 'Conference Materials', role: 'volunteer', external: true },
   { href: 'settings.html', icon: 'fa-gear', label: 'Settings', role: 'admin' },
