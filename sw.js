@@ -10,7 +10,7 @@
  * ============================================================
  */
 
-const CACHE_VERSION = 'cams-cache-v7';
+const CACHE_VERSION = 'cams-cache-v8';
 
 const PRECACHE_URLS = [
   './',

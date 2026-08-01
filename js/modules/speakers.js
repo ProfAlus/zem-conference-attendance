@@ -39,14 +39,16 @@ function render() {
   }
 
   listEl.innerHTML = results.map((s) => `
-    <div class="card mb-4" style="display:flex; gap:18px; align-items:flex-start;">
-      ${s.photoUrl
-        ? `<img src="${escapeHtml(s.photoUrl)}" alt="${escapeHtml(s.name)}" style="width:84px; height:84px; border-radius:50%; object-fit:cover; flex-shrink:0; border:2px solid var(--color-ink-200);">`
-        : `<div style="width:84px; height:84px; border-radius:50%; background: var(--color-coral-tint); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i class="fa-solid fa-user" style="color: var(--color-coral); font-size:1.8rem;"></i></div>`}
-      <div style="min-width:0;">
-        <h3 style="margin-bottom:2px;">${escapeHtml(s.name)}</h3>
-        ${s.title ? `<div class="text-muted" style="font-weight:600; font-size:0.9rem; margin-bottom:10px;">${escapeHtml(s.title)}</div>` : ''}
-        ${s.bio ? `<p style="margin:0; white-space:pre-wrap;">${escapeHtml(s.bio)}</p>` : ''}
+    <div class="speaker-card mb-4">
+      <div class="speaker-card-header">
+        <h3>${escapeHtml(s.name)}</h3>
+        ${s.title ? `<div class="speaker-title">${escapeHtml(s.title)}</div>` : ''}
+        ${s.photoUrl
+          ? `<img class="speaker-card-photo" src="${escapeHtml(s.photoUrl)}" alt="${escapeHtml(s.name)}">`
+          : `<div class="speaker-card-photo-placeholder"><i class="fa-solid fa-user"></i></div>`}
+      </div>
+      <div class="speaker-card-body">
+        ${s.bio ? `<p>${escapeHtml(s.bio)}</p>` : `<p class="text-muted" style="font-style:italic;">No bio added yet.</p>`}
       </div>
     </div>
   `).join('');
