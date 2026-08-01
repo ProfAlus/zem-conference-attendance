@@ -6,7 +6,7 @@ import { renderShell } from '../core/nav.js';
 import { apiCall } from '../core/api.js';
 import { toastError, toastSuccess } from '../core/toast.js';
 import { openModal, confirmDialog } from '../core/modal.js';
-import { escapeHtml } from '../core/utils.js';
+import { escapeHtml, normalizeDriveUrl, formatDate } from '../core/utils.js';
 import { applyBranding } from '../core/theme.js';
 
 const content = renderShell('settings.html', 'Settings', 'admin');
@@ -63,7 +63,7 @@ async function init() {
             <input class="input" id="logoUrl" value="${settings.logoUrl || ''}" placeholder="https://… (or upload a file below)"></div>
           <div class="field">
             <div class="flex gap-3" style="align-items:center;">
-              ${settings.logoUrl ? `<img id="logoPreview" src="${settings.logoUrl}" alt="Current logo" style="height:44px; width:auto; border-radius:6px; border:1px solid var(--color-ink-200);">` : '<span id="logoPreview" class="text-muted" style="font-size:0.8rem;">No logo yet</span>'}
+              ${settings.logoUrl ? `<img id="logoPreview" src="${normalizeDriveUrl(settings.logoUrl)}" alt="Current logo" style="height:44px; width:auto; border-radius:6px; border:1px solid var(--color-ink-200);">` : '<span id="logoPreview" class="text-muted" style="font-size:0.8rem;">No logo yet</span>'}
               <button type="button" class="btn btn-outline btn-sm" id="uploadLogoBtn"><i class="fa-solid fa-upload"></i> Upload logo image</button>
               <input type="file" id="logoFileInput" accept="image/*" style="display:none;">
             </div>
@@ -190,6 +190,38 @@ async function init() {
     </div>
 
     <div class="card mt-6">
+      <div class="flex-between mb-4">
+        <div>
+          <h3 style="margin:0;">Photo gallery</h3>
+          <p class="text-muted" style="margin:4px 0 0;">Event highlight photos shown with a lightbox on the public Gallery page.</p>
+        </div>
+        <button class="btn btn-primary btn-sm" id="addGalleryBtn"><i class="fa-solid fa-plus"></i> Add photo</button>
+      </div>
+      <div id="galleryThumbGrid" class="gallery-grid mb-4" style="grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));"></div>
+      <p class="text-muted" style="font-size:0.8rem; margin-top:8px;">
+        <a href="gallery.html" target="_blank" rel="noopener">View the public Gallery page &rarr;</a>
+      </p>
+    </div>
+
+    <div class="card mt-6">
+      <div class="flex-between mb-4">
+        <div>
+          <h3 style="margin:0;">Questions &amp; testimonies</h3>
+          <p class="text-muted" style="margin:4px 0 0;">Every submission starts hidden — review and show the ones you want public, and choose whether each name is shown.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Type</th><th>Name</th><th>Content</th><th>Visible</th><th>Anonymous</th><th></th></tr></thead>
+          <tbody id="submissionsTbody"></tbody>
+        </table>
+      </div>
+      <p class="text-muted" style="font-size:0.8rem; margin-top:8px;">
+        <a href="voices.html" target="_blank" rel="noopener">View the public Questions &amp; Testimonies page &rarr;</a>
+      </p>
+    </div>
+
+    <div class="card mt-6">
       <h3>Reuse this system for another event</h3>
       <p class="text-muted">
         Archive the current participants, attendance, and activity logs into dated backup
@@ -264,6 +296,11 @@ async function init() {
 
   document.getElementById('addSpeakerBtn').addEventListener('click', () => openSpeakerModal());
   await loadSpeakers();
+
+  document.getElementById('addGalleryBtn').addEventListener('click', () => openGalleryModal());
+  await loadGallery();
+
+  await loadSubmissions();
 }
 
 function formatTime12h(hhmm) {
@@ -669,7 +706,7 @@ async function loadSpeakers() {
     }
     tbody.innerHTML = speakers.map((s) => `
       <tr>
-        <td>${s.photoUrl ? `<img src="${escapeHtml(s.photoUrl)}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">` : `<div style="width:32px;height:32px;border-radius:50%;background:var(--color-coral-tint);display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-user" style="font-size:0.7rem;color:var(--color-coral);"></i></div>`}</td>
+        <td>${s.photoUrl ? `<img src="${escapeHtml(normalizeDriveUrl(s.photoUrl))}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">` : `<div style="width:32px;height:32px;border-radius:50%;background:var(--color-coral-tint);display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-user" style="font-size:0.7rem;color:var(--color-coral);"></i></div>`}</td>
         <td><strong>${escapeHtml(s.name)}</strong></td>
         <td>${escapeHtml(s.title || '\u2014')}</td>
         <td>
@@ -715,11 +752,19 @@ function openSpeakerModal(existing = null) {
     <div class="field">
       <label>Photo <span class="text-muted">(optional)</span></label>
       <div class="flex gap-3" style="align-items:center;">
-        ${existing?.photoUrl ? `<img id="spkPhotoPreview" src="${escapeHtml(existing.photoUrl)}" alt="" style="height:44px;width:44px;border-radius:50%;object-fit:cover;border:1px solid var(--color-ink-200);">` : '<span id="spkPhotoPreview" class="text-muted" style="font-size:0.8rem;">No photo yet</span>'}
+        ${existing?.photoUrl ? `<img id="spkPhotoPreview" src="${escapeHtml(normalizeDriveUrl(existing.photoUrl))}" alt="" style="height:44px;width:44px;border-radius:50%;object-fit:cover;border:1px solid var(--color-ink-200);">` : '<span id="spkPhotoPreview" class="text-muted" style="font-size:0.8rem;">No photo yet</span>'}
         <button type="button" class="btn btn-outline btn-sm" id="spkUploadBtn"><i class="fa-solid fa-upload"></i> Upload photo</button>
         <input type="file" id="spkFileInput" accept="image/*" style="display:none;">
       </div>
       <input class="input mt-4" id="spkPhotoUrl" value="${existing ? escapeHtml(existing.photoUrl || '') : ''}" placeholder="Or paste an image URL">
+    </div>
+    <div class="field">
+      <label>Social links <span class="text-muted">(all optional)</span></label>
+      <input class="input mb-4" id="spkFacebook" value="${existing ? escapeHtml(existing.facebook || '') : ''}" placeholder="Facebook URL">
+      <input class="input mb-4" id="spkTwitter" value="${existing ? escapeHtml(existing.twitter || '') : ''}" placeholder="Twitter / X URL">
+      <input class="input mb-4" id="spkInstagram" value="${existing ? escapeHtml(existing.instagram || '') : ''}" placeholder="Instagram URL">
+      <input class="input mb-4" id="spkLinkedin" value="${existing ? escapeHtml(existing.linkedin || '') : ''}" placeholder="LinkedIn URL">
+      <input class="input" id="spkWebsite" value="${existing ? escapeHtml(existing.website || '') : ''}" placeholder="Website URL">
     </div>
   `;
   const backdrop = openModal(isEdit ? 'Edit speaker' : 'Add speaker', body, [
@@ -733,6 +778,11 @@ function openSpeakerModal(existing = null) {
           title: document.getElementById('spkTitle').value.trim(),
           bio: document.getElementById('spkBio').value.trim(),
           photoUrl: document.getElementById('spkPhotoUrl').value.trim(),
+          facebook: document.getElementById('spkFacebook').value.trim(),
+          twitter: document.getElementById('spkTwitter').value.trim(),
+          instagram: document.getElementById('spkInstagram').value.trim(),
+          linkedin: document.getElementById('spkLinkedin').value.trim(),
+          website: document.getElementById('spkWebsite').value.trim(),
         };
         if (!payload.name) { toastError('Name is required.'); return; }
         try {
@@ -781,6 +831,187 @@ function openSpeakerModal(existing = null) {
       e.target.value = '';
     }
   });
+}
+
+async function loadGallery() {
+  const grid = document.getElementById('galleryThumbGrid');
+  grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:16px;"><span class="spinner spinner-dark"></span></div>`;
+  try {
+    const images = await apiCall('getGalleryImages');
+    if (!images.length) {
+      grid.innerHTML = `<div class="text-muted" style="grid-column:1/-1; padding:8px 0;">No photos yet.</div>`;
+      return;
+    }
+    grid.innerHTML = images.map((img) => `
+      <div class="gallery-thumb" data-id="${escapeHtml(img.id)}" style="aspect-ratio:1/1;">
+        <img src="${escapeHtml(normalizeDriveUrl(img.imageUrl))}" alt="">
+        <div style="position:absolute; top:4px; right:4px; display:flex; gap:4px;">
+          <button class="btn btn-sm btn-ghost edit-gallery" data-id="${escapeHtml(img.id)}" style="background:rgba(255,255,255,0.9); width:26px; height:26px; padding:0;"><i class="fa-solid fa-pen" style="font-size:0.7rem;"></i></button>
+          <button class="btn btn-sm btn-ghost delete-gallery" data-id="${escapeHtml(img.id)}" style="background:rgba(255,255,255,0.9); width:26px; height:26px; padding:0; color:var(--color-danger);"><i class="fa-solid fa-trash" style="font-size:0.7rem;"></i></button>
+        </div>
+      </div>
+    `).join('');
+
+    grid.querySelectorAll('.edit-gallery').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openGalleryModal(images.find((x) => x.id === btn.dataset.id));
+      });
+    });
+    grid.querySelectorAll('.delete-gallery').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const ok = await confirmDialog('Remove this photo from the gallery?', { title: 'Remove photo', confirmLabel: 'Remove', danger: true });
+        if (!ok) return;
+        try {
+          await apiCall('deleteGalleryImage', { id: btn.dataset.id });
+          toastSuccess('Photo removed.');
+          loadGallery();
+        } catch (err) {
+          toastError(err.message);
+        }
+      });
+    });
+  } catch (err) {
+    grid.innerHTML = `<div class="text-muted" style="grid-column:1/-1;">${err.message}</div>`;
+  }
+}
+
+function openGalleryModal(existing = null) {
+  const isEdit = !!existing;
+  const body = `
+    <div class="field">
+      <label>Photo</label>
+      <div class="flex gap-3" style="align-items:center;">
+        ${existing?.imageUrl ? `<img id="galPhotoPreview" src="${escapeHtml(normalizeDriveUrl(existing.imageUrl))}" alt="" style="height:56px;width:56px;border-radius:8px;object-fit:cover;border:1px solid var(--color-ink-200);">` : '<span id="galPhotoPreview" class="text-muted" style="font-size:0.8rem;">No photo yet</span>'}
+        <button type="button" class="btn btn-outline btn-sm" id="galUploadBtn"><i class="fa-solid fa-upload"></i> Upload photo</button>
+        <input type="file" id="galFileInput" accept="image/*" style="display:none;">
+      </div>
+      <input class="input mt-4" id="galImageUrl" value="${existing ? escapeHtml(existing.imageUrl || '') : ''}" placeholder="Or paste an image URL">
+    </div>
+    <div class="field"><label for="galCaption">Caption <span class="text-muted">(optional)</span></label>
+      <input class="input" id="galCaption" value="${existing ? escapeHtml(existing.caption || '') : ''}"></div>
+    <div class="field"><label for="galCategory">Category <span class="text-muted">(optional, groups photos together)</span></label>
+      <input class="input" id="galCategory" value="${existing ? escapeHtml(existing.category || '') : ''}" placeholder="e.g. Bible Study, Discussions, Worship"></div>
+  `;
+  const backdrop = openModal(isEdit ? 'Edit photo' : 'Add photo', body, [
+    { label: 'Cancel', className: 'btn-ghost', onClick: (b) => b.remove() },
+    {
+      label: isEdit ? 'Save changes' : 'Add photo',
+      className: 'btn-primary',
+      onClick: async (b) => {
+        const payload = {
+          imageUrl: document.getElementById('galImageUrl').value.trim(),
+          caption: document.getElementById('galCaption').value.trim(),
+          category: document.getElementById('galCategory').value.trim(),
+        };
+        if (!payload.imageUrl) { toastError('Please upload a photo or paste an image URL.'); return; }
+        try {
+          if (isEdit) {
+            await apiCall('updateGalleryImage', { id: existing.id, ...payload });
+            toastSuccess('Photo updated.');
+          } else {
+            await apiCall('addGalleryImage', payload);
+            toastSuccess('Photo added.');
+          }
+          b.remove();
+          loadGallery();
+        } catch (err) {
+          toastError(err.message);
+        }
+      },
+    },
+  ]);
+
+  backdrop.querySelector('#galUploadBtn').addEventListener('click', () => backdrop.querySelector('#galFileInput').click());
+  backdrop.querySelector('#galFileInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toastError('Please choose an image file.'); return; }
+
+    const uploadBtn = backdrop.querySelector('#galUploadBtn');
+    const original = uploadBtn.innerHTML;
+    uploadBtn.disabled = true;
+    uploadBtn.innerHTML = '<span class="spinner spinner-dark" style="width:14px;height:14px;border-width:2px;"></span> Uploading…';
+    try {
+      const { base64, mimeType } = await resizeImageToBase64(file, 1200);
+      const { url } = await apiCall('uploadLogo', { base64, mimeType, fileName: file.name });
+      backdrop.querySelector('#galImageUrl').value = url;
+      const preview = backdrop.querySelector('#galPhotoPreview');
+      const img = document.createElement('img');
+      img.id = 'galPhotoPreview';
+      img.src = url;
+      img.style.cssText = 'height:56px;width:56px;border-radius:8px;object-fit:cover;border:1px solid var(--color-ink-200);';
+      preview.replaceWith(img);
+      toastSuccess('Photo uploaded.');
+    } catch (err) {
+      toastError(err.message);
+    } finally {
+      uploadBtn.disabled = false;
+      uploadBtn.innerHTML = original;
+      e.target.value = '';
+    }
+  });
+}
+
+async function loadSubmissions() {
+  const tbody = document.getElementById('submissionsTbody');
+  tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:16px;"><span class="spinner spinner-dark"></span></td></tr>`;
+  try {
+    const entries = await apiCall('getAllEntries');
+    if (!entries.length) {
+      tbody.innerHTML = `<tr><td colspan="6" class="text-muted" style="text-align:center;padding:16px;">No submissions yet.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = entries.map((e) => `
+      <tr>
+        <td><span class="badge ${e.type === 'Testimony' ? 'badge-gold' : 'badge-neutral'}">${escapeHtml(e.type)}</span></td>
+        <td>${escapeHtml(e.name || '\u2014')}</td>
+        <td style="max-width:260px; white-space:normal;">${escapeHtml(e.content.length > 140 ? e.content.slice(0, 140) + '\u2026' : e.content)}</td>
+        <td><label class="radio-pill" style="width:fit-content;"><input type="checkbox" class="toggle-visible" data-id="${escapeHtml(e.id)}" ${e.visible ? 'checked' : ''}> Show</label></td>
+        <td><label class="radio-pill" style="width:fit-content;"><input type="checkbox" class="toggle-anonymous" data-id="${escapeHtml(e.id)}" ${e.anonymous ? 'checked' : ''}> Anon</label></td>
+        <td><button class="btn btn-sm btn-ghost delete-submission" data-id="${escapeHtml(e.id)}" style="color:var(--color-danger);"><i class="fa-solid fa-trash"></i></button></td>
+      </tr>
+    `).join('');
+
+    tbody.querySelectorAll('.toggle-visible').forEach((cb) => {
+      cb.addEventListener('change', async () => {
+        try {
+          await apiCall('updateSubmission', { id: cb.dataset.id, visible: cb.checked });
+          toastSuccess(cb.checked ? 'Now showing publicly.' : 'Hidden from public view.');
+        } catch (err) {
+          toastError(err.message);
+          cb.checked = !cb.checked;
+        }
+      });
+    });
+    tbody.querySelectorAll('.toggle-anonymous').forEach((cb) => {
+      cb.addEventListener('change', async () => {
+        try {
+          await apiCall('updateSubmission', { id: cb.dataset.id, anonymous: cb.checked });
+          toastSuccess(cb.checked ? 'Name will be hidden.' : 'Name will be shown.');
+        } catch (err) {
+          toastError(err.message);
+          cb.checked = !cb.checked;
+        }
+      });
+    });
+    tbody.querySelectorAll('.delete-submission').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const ok = await confirmDialog('Permanently delete this submission?', { title: 'Delete submission', confirmLabel: 'Delete', danger: true });
+        if (!ok) return;
+        try {
+          await apiCall('deleteSubmission', { id: btn.dataset.id });
+          toastSuccess('Submission deleted.');
+          loadSubmissions();
+        } catch (err) {
+          toastError(err.message);
+        }
+      });
+    });
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="6" class="text-muted" style="text-align:center;padding:16px;">${err.message}</td></tr>`;
+  }
 }
 
 function openUserModal(existing = null) {

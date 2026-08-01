@@ -76,6 +76,19 @@ export function getQueryParams() {
   return Object.fromEntries(new URLSearchParams(window.location.search));
 }
 
+/**
+ * Normalizes any Google Drive URL variant (a raw share link, or the older
+ * unreliable "uc?export=view" hotlink format) into Drive's thumbnail
+ * endpoint, which renders much more consistently in a plain <img> tag.
+ * Non-Drive URLs pass through unchanged.
+ */
+export function normalizeDriveUrl(url) {
+  if (!url) return url;
+  const match = url.match(/drive\.google\.com\/(?:file\/d\/|uc\?.*?id=|thumbnail\?id=)([a-zA-Z0-9_-]+)/);
+  if (!match) return url;
+  return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
+}
+
 /** Trigger a browser download of a Blob. */
 export function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);

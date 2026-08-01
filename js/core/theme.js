@@ -6,6 +6,7 @@
 // ============================================================
 
 import { apiCall } from './api.js';
+import { normalizeDriveUrl } from './utils.js';
 
 /** Fetches settings and applies branding. Use when a page has no other reason to call getSettings. */
 export async function loadAndApplyBranding() {
@@ -45,7 +46,7 @@ function renderLogos(logoUrl, conferenceName) {
     el.classList.remove('dot');
     el.classList.add('brand-logo-slot');
     const sizeClass = el.dataset.brandLogo === 'sidebar' ? 'brand-logo-img--sidebar' : 'brand-logo-img--public';
-    el.innerHTML = `<img src="${logoUrl}" alt="${escapeAttr(conferenceName || 'Conference')} logo" class="brand-logo-img ${sizeClass}">`;
+    el.innerHTML = `<img src="${normalizeDriveUrl(logoUrl)}" alt="${escapeAttr(conferenceName || 'Conference')} logo" class="brand-logo-img ${sizeClass}">`;
   });
 }
 

@@ -2,6 +2,46 @@
    COMPONENTS
    ============================================================ */
 
+/* ---------- Gallery grid ---------- */
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+.gallery-thumb { position: relative; border-radius: var(--radius-sm); overflow: hidden; cursor: pointer; aspect-ratio: 1 / 1; box-shadow: var(--shadow-sm); }
+.gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.2s ease; }
+.gallery-thumb:hover img { transform: scale(1.06); }
+.gallery-thumb-caption {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 10px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.75)); color: #fff; font-size: 0.75rem;
+  opacity: 0; transition: opacity 0.15s ease;
+}
+.gallery-thumb:hover .gallery-thumb-caption { opacity: 1; }
+
+/* ---------- Lightbox (Speakers photo, Gallery navigation) ---------- */
+.lightbox-backdrop {
+  display: none; position: fixed; inset: 0; background: rgba(10,8,24,0.92); z-index: 500;
+  align-items: center; justify-content: center;
+}
+.lightbox-backdrop.open { display: flex; }
+.lightbox-content { max-width: 90vw; max-height: 85vh; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.lightbox-img { max-width: 90vw; max-height: 78vh; object-fit: contain; border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); }
+.lightbox-caption { color: #fff; font-size: 0.9rem; text-align: center; max-width: 70vw; }
+.lightbox-close {
+  position: absolute; top: 18px; right: 18px; width: 42px; height: 42px; border-radius: 50%;
+  background: rgba(255,255,255,0.12); border: none; color: #fff; font-size: 1.2rem; cursor: pointer; z-index: 2;
+}
+.lightbox-close:hover { background: rgba(255,255,255,0.22); }
+.lightbox-nav {
+  position: absolute; top: 50%; transform: translateY(-50%); width: 48px; height: 48px; border-radius: 50%;
+  background: rgba(255,255,255,0.12); border: none; color: #fff; font-size: 1.1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.lightbox-nav:hover { background: rgba(255,255,255,0.22); }
+.lightbox-prev { left: 16px; }
+.lightbox-next { right: 16px; }
+@media (max-width: 600px) {
+  .lightbox-nav { width: 40px; height: 40px; }
+  .lightbox-prev { left: 6px; }
+  .lightbox-next { right: 6px; }
+}
+
 /* ---------- Speaker card (header bar + overlapping circular photo) ---------- */
 .speaker-card { position: relative; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); background: var(--color-surface); }
 .speaker-card-header { background: var(--color-ink-900); color: #fff; padding: 18px 100px 26px 20px; position: relative; }
@@ -16,6 +56,13 @@
 .speaker-card-photo-placeholder i { color: var(--color-coral); font-size: 1.6rem; }
 .speaker-card-body { padding: 46px 20px 20px; }
 .speaker-card-body p { margin: 0; white-space: pre-wrap; color: var(--color-ink-700); }
+.speaker-social { display: flex; gap: 10px; margin-top: 14px; }
+.speaker-social a {
+  width: 34px; height: 34px; border-radius: 50%; background: var(--color-cream-100);
+  display: flex; align-items: center; justify-content: center; color: var(--color-ink-700);
+  transition: all 0.15s ease;
+}
+.speaker-social a:hover { background: var(--color-coral); color: #fff; }
 
 /* ---------- Brand logo (replaces the dot when a logo URL is set) ---------- */
 .brand-logo-slot { display: inline-flex; align-items: center; }
