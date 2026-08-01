@@ -112,8 +112,8 @@ function testimonyCardHtml(e) {
   const { shown, isTruncated } = truncated(e.content);
   return `
     <div class="testimony-card">
-      <div class="quote-mark">&ldquo;</div>
-      <p style="margin:0; white-space:pre-wrap;" data-full="${isTruncated ? escapeHtml(e.id) : ''}">${escapeHtml(shown)}</p>
+      <div class="card-badge"><i class="fa-solid fa-quote-left"></i></div>
+      <p style="margin:0; white-space:pre-wrap;">${escapeHtml(shown)}</p>
       ${isTruncated ? `<button class="voice-readmore" data-readmore="${escapeHtml(e.id)}">Read full testimony</button>` : ''}
       <div class="voice-footer">
         <div class="voice-avatar" style="background:${color};">${initials}</div>
@@ -131,14 +131,11 @@ function questionCardHtml(e) {
   const { shown, isTruncated } = truncated(e.content);
   return `
     <div class="question-card">
-      <div class="qmark-icon">?</div>
-      <div class="q-label">Question</div>
-      <div class="qbody">
-        <p style="margin:0; white-space:pre-wrap;">${escapeHtml(shown)}</p>
-        ${isTruncated ? `<button class="voice-readmore" data-readmore="${escapeHtml(e.id)}">Read full question</button>` : ''}
-      </div>
+      <div class="card-badge"><i class="fa-solid fa-circle-question"></i></div>
+      <p style="margin:0; white-space:pre-wrap;">${escapeHtml(shown)}</p>
+      ${isTruncated ? `<button class="voice-readmore" data-readmore="${escapeHtml(e.id)}">Read full question</button>` : ''}
       <div class="voice-header">
-        <div class="voice-avatar"><i class="fa-solid fa-user" style="font-size:0.65rem;"></i></div>
+        <div class="voice-avatar"><i class="fa-solid fa-user" style="font-size:0.7rem;"></i></div>
         <div>
           <div class="voice-name">${escapeHtml(e.name || 'Anonymous')}</div>
           <div class="voice-date">${formatDate(e.date)}</div>
