@@ -208,7 +208,9 @@
 
 /* ---------- Cards ---------- */
 .card {
-  background: var(--color-surface);
+   background-color:#1f3c8c;
+   color:#fff;
+  /* background: var(--color-surface); */
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   padding: var(--sp-5);
